@@ -1,2 +1,5 @@
 
 save and restore breakpoints addin?
+
+codeview, when refreshing tv on new mod selection, make sure to show code window (now show with single click)
+codeview: option in find all to show all in one listing?

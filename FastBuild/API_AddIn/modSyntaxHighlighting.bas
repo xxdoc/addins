@@ -124,7 +124,8 @@ Private Sub InitalizeTokens()
                        "Call,True,False,Set,To,Each,In,Is,Nothing,Dim," & _
                        "Redim,Preserve,On,Error,Resume,True,False,IsArray," & _
                        "IsObject,IsNumeric,Const,String,Integer,Long,Byte," & _
-                       "Variant,Double,Single,Currency,As,Property,Get,Let,Set,Boolean,ByVal,ByRef,Public,Declare", ",")
+                       "Variant,Double,Single,Currency,As,Property,Get,Let," & _
+                       "Set,Boolean,ByVal,ByRef,Public,Declare,Private", ",")
                     
     jsTokens() = Split("if,else,switch,new,var,function,eval,break,exit," & _
                        "for,while,case,default,true,false,NaN", ",")

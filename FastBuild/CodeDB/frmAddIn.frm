@@ -1,18 +1,14 @@
 VERSION 5.00
-Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
+Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "richtx32.ocx"
 Begin VB.Form frmAddIn 
-   BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Code Database Addin -dzzie@yahoo.com"
    ClientHeight    =   6735
-   ClientLeft      =   2175
-   ClientTop       =   2220
+   ClientLeft      =   2190
+   ClientTop       =   2235
    ClientWidth     =   13095
    LinkTopic       =   "Form1"
-   MaxButton       =   0   'False
-   MinButton       =   0   'False
    ScaleHeight     =   6735
    ScaleWidth      =   13095
-   ShowInTaskbar   =   0   'False
    StartUpPosition =   2  'CenterScreen
    Begin VB.ComboBox cboLang 
       Height          =   315
@@ -193,6 +189,7 @@ Begin VB.Form frmAddIn
       _ExtentX        =   14870
       _ExtentY        =   10663
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   3
       RightMargin     =   50000
       TextRTF         =   $"frmAddIn.frx":0000
@@ -301,7 +298,11 @@ Private Sub Command1_Click(Index As Integer)
     On Error GoTo oops
     Select Case Index
         Case 0: Call extract
+        
         Case 1: Call AddNewCode
+                Text3 = Empty
+                Text4 = Empty
+                
         'Case 2: Call comment
         'Case 3: Call comment(False)
         Case 4: Clipboard.Clear: Clipboard.SetText Text2.Text

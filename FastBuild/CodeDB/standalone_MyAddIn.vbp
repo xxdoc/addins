@@ -1,13 +1,13 @@
 Type=Exe
 Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\WINDOWS\system32\stdole2.tlb#OLE Automation
-Reference=*\G{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}#2.0#0#C:\Program Files\Common Files\Microsoft Shared\OFFICE12\MSO.DLL#Microsoft Office 8.0 Object Library
-Reference=*\G{AC0714F2-3D04-11D1-AE7D-00A0C90F26F4}#1.0#0#C:\Program Files\Common Files\Designer\MSADDNDR.DLL#Add-In Designer/Instance Control Library
+Reference=*\G{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}#2.0#0#C:\Program Files\Common Files\Microsoft Shared\VBA\MSO97RT.DLL#Microsoft Office 8.0 Object Library
+Reference=*\G{AC0714F2-3D04-11D1-AE7D-00A0C90F26F4}#1.0#0#C:\Program Files\Common Files\DESIGNER\MSADDNDR.DLL#Add-In Designer/Instance Control Library
 Reference=*\G{EF404E00-EDA6-101A-8DAF-00DD010F7EBB}#5.3#0#C:\Program Files\Microsoft Visual Studio\VB98\VB6EXT.OLB#Microsoft Visual Basic 6.0 Extensibility
 Reference=*\G{00025E01-0000-0000-C000-000000000046}#5.0#0#C:\Program Files\Common Files\Microsoft Shared\DAO\dao360.dll#Microsoft DAO 3.6 Object Library
 Form=frmAddIn.frm
 Form=frmLazy.frm
 Module=modSyntaxHighlighting; ..\API_AddIn\modSyntaxHighlighting.bas
-Object={3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0; RICHTX32.OCX
+Object={3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0; richtx32.ocx
 ResFile32="MyAddIn.RES"
 Startup="frmAddIn"
 HelpFile=""
