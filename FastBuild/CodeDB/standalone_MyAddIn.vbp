@@ -4,15 +4,18 @@ Reference=*\G{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}#2.0#0#C:\Program Files\Commo
 Reference=*\G{AC0714F2-3D04-11D1-AE7D-00A0C90F26F4}#1.0#0#C:\Program Files\Common Files\DESIGNER\MSADDNDR.DLL#Add-In Designer/Instance Control Library
 Reference=*\G{EF404E00-EDA6-101A-8DAF-00DD010F7EBB}#5.3#0#C:\Program Files\Microsoft Visual Studio\VB98\VB6EXT.OLB#Microsoft Visual Basic 6.0 Extensibility
 Reference=*\G{00025E01-0000-0000-C000-000000000046}#5.0#0#C:\Program Files\Common Files\Microsoft Shared\DAO\dao360.dll#Microsoft DAO 3.6 Object Library
+Reference=*\G{00000205-0000-0010-8000-00AA006D2EA4}#2.5#0#C:\Program Files\Common Files\system\ado\msado25.tlb#Microsoft ActiveX Data Objects 2.5 Library
+Object={3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0; RICHTX32.OCX
 Form=frmAddIn.frm
 Form=frmLazy.frm
 Module=modSyntaxHighlighting; ..\API_AddIn\modSyntaxHighlighting.bas
-Object={3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0; richtx32.ocx
+Form=frmAdo.frm
+Class=clsCmnDlg2; clsCmnDlg2.cls
 ResFile32="MyAddIn.RES"
 Startup="frmAddIn"
 HelpFile=""
 Title="CodeDB"
-ExeName32="MyAddIn.exe"
+ExeName32="CodeDB.exe"
 Command32=""
 Name="Codedb"
 HelpContextID="0"
@@ -45,4 +48,4 @@ MaxNumberOfThreads=1
 AutoRefresh=1
 
 [fastBuild]
-fullPath=.\CodeDB.exe
+fullPath=D:\_code\vb6_addins\FastBuild\CodeDB\CodeDB.exe
