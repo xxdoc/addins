@@ -10,19 +10,11 @@ Begin VB.Form frmAddIn
    ScaleHeight     =   6735
    ScaleWidth      =   13095
    StartUpPosition =   2  'CenterScreen
-   Begin VB.CommandButton cmdDelete 
-      Caption         =   "Delete"
-      Height          =   285
-      Left            =   10485
-      TabIndex        =   23
-      Top             =   6300
-      Width           =   690
-   End
    Begin VB.CommandButton cmdSaveFile 
       Caption         =   "Add File"
       Height          =   285
       Left            =   9450
-      TabIndex        =   22
+      TabIndex        =   19
       Top             =   6300
       Width           =   915
    End
@@ -30,7 +22,7 @@ Begin VB.Form frmAddIn
       Caption         =   " Add New Code "
       Height          =   4875
       Left            =   3195
-      TabIndex        =   10
+      TabIndex        =   7
       Top             =   540
       Visible         =   0   'False
       Width           =   8700
@@ -38,7 +30,7 @@ Begin VB.Form frmAddIn
          Caption         =   "IPC Test"
          Height          =   330
          Left            =   270
-         TabIndex        =   24
+         TabIndex        =   20
          Top             =   1845
          Width           =   960
       End
@@ -46,7 +38,7 @@ Begin VB.Form frmAddIn
          Caption         =   ".."
          Height          =   240
          Left            =   5355
-         TabIndex        =   21
+         TabIndex        =   18
          Top             =   4500
          Width           =   240
       End
@@ -55,7 +47,7 @@ Begin VB.Form frmAddIn
          Height          =   240
          Index           =   1
          Left            =   5625
-         TabIndex        =   20
+         TabIndex        =   17
          Top             =   4500
          Width           =   915
       End
@@ -63,7 +55,7 @@ Begin VB.Form frmAddIn
          Height          =   285
          Left            =   855
          OLEDropMode     =   1  'Manual
-         TabIndex        =   19
+         TabIndex        =   16
          Top             =   4500
          Width           =   4470
       End
@@ -79,7 +71,7 @@ Begin VB.Form frmAddIn
          EndProperty
          Height          =   375
          Left            =   1620
-         TabIndex        =   14
+         TabIndex        =   11
          Top             =   270
          Width           =   6570
       End
@@ -97,7 +89,7 @@ Begin VB.Form frmAddIn
          Left            =   1575
          MultiLine       =   -1  'True
          ScrollBars      =   3  'Both
-         TabIndex        =   13
+         TabIndex        =   10
          Top             =   780
          Width           =   6660
       End
@@ -106,7 +98,7 @@ Begin VB.Form frmAddIn
          Height          =   255
          Index           =   0
          Left            =   6615
-         TabIndex        =   12
+         TabIndex        =   9
          Top             =   4500
          Width           =   855
       End
@@ -115,7 +107,7 @@ Begin VB.Form frmAddIn
          Height          =   255
          Index           =   2
          Left            =   7515
-         TabIndex        =   11
+         TabIndex        =   8
          Top             =   4500
          Width           =   855
       End
@@ -123,7 +115,7 @@ Begin VB.Form frmAddIn
          Caption         =   "Add File"
          Height          =   285
          Left            =   90
-         TabIndex        =   18
+         TabIndex        =   15
          Top             =   4500
          Width           =   1005
       End
@@ -141,7 +133,7 @@ Begin VB.Form frmAddIn
          ForeColor       =   &H00FF0000&
          Height          =   330
          Left            =   8325
-         TabIndex        =   17
+         TabIndex        =   14
          Top             =   180
          Width           =   330
       End
@@ -149,7 +141,7 @@ Begin VB.Form frmAddIn
          Caption         =   "Code Body"
          Height          =   375
          Left            =   225
-         TabIndex        =   16
+         TabIndex        =   13
          Top             =   900
          Width           =   1095
       End
@@ -157,7 +149,7 @@ Begin VB.Form frmAddIn
          Caption         =   "Prototype"
          Height          =   285
          Left            =   270
-         TabIndex        =   15
+         TabIndex        =   12
          Top             =   315
          Width           =   1005
       End
@@ -166,7 +158,7 @@ Begin VB.Form frmAddIn
       Caption         =   "Files"
       Height          =   285
       Left            =   8415
-      TabIndex        =   9
+      TabIndex        =   6
       Top             =   6300
       Width           =   960
    End
@@ -174,7 +166,7 @@ Begin VB.Form frmAddIn
       Caption         =   "Function"
       Height          =   285
       Left            =   7290
-      TabIndex        =   8
+      TabIndex        =   5
       Top             =   6300
       Value           =   -1  'True
       Width           =   1050
@@ -183,33 +175,16 @@ Begin VB.Form frmAddIn
       Height          =   315
       Left            =   5310
       Style           =   2  'Dropdown List
-      TabIndex        =   7
+      TabIndex        =   4
       Top             =   6300
       Width           =   1860
-   End
-   Begin VB.ListBox lstFilter 
-      BeginProperty Font 
-         Name            =   "Verdana"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   2220
-      Left            =   1080
-      TabIndex        =   4
-      Top             =   1305
-      Visible         =   0   'False
-      Width           =   2970
    End
    Begin VB.CommandButton Command1 
       Caption         =   "Clear"
       Height          =   255
       Index           =   5
       Left            =   12090
-      TabIndex        =   3
+      TabIndex        =   1
       Top             =   6300
       Width           =   855
    End
@@ -218,46 +193,14 @@ Begin VB.Form frmAddIn
       Height          =   255
       Index           =   4
       Left            =   11250
-      TabIndex        =   2
+      TabIndex        =   0
       Top             =   6300
       Width           =   855
-   End
-   Begin VB.TextBox Text1 
-      BeginProperty Font 
-         Name            =   "Verdana"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   90
-      TabIndex        =   1
-      Top             =   6255
-      Width           =   4365
-   End
-   Begin VB.ListBox List1 
-      BeginProperty Font 
-         Name            =   "Verdana"
-         Size            =   9.75
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   6060
-      Left            =   90
-      TabIndex        =   0
-      Top             =   120
-      Width           =   4365
    End
    Begin RichTextLib.RichTextBox Text2 
       Height          =   6045
       Left            =   4500
-      TabIndex        =   5
+      TabIndex        =   2
       Top             =   135
       Width           =   8430
       _ExtentX        =   14870
@@ -276,11 +219,20 @@ Begin VB.Form frmAddIn
          Strikethrough   =   0   'False
       EndProperty
    End
+   Begin Codedb.ucFilterList lv 
+      Height          =   6495
+      Left            =   90
+      TabIndex        =   21
+      Top             =   135
+      Width           =   4290
+      _ExtentX        =   7567
+      _ExtentY        =   11456
+   End
    Begin VB.Label Lang 
       Caption         =   "Lang"
       Height          =   240
       Left            =   4770
-      TabIndex        =   6
+      TabIndex        =   3
       Top             =   6300
       Width           =   420
    End
@@ -303,6 +255,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+Private Declare Function GetTickCount Lib "kernel32" () As Long
 Private Declare Function PostMessage Lib "user32" Alias "PostMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
 Private Declare Function IsWindow Lib "user32" (ByVal hwnd As Long) As Long
 Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Any) As Long
@@ -320,32 +273,28 @@ Enum cmdTypes
     ct_addFile
 End Enum
 
-'todo: load projDir from command passed in from addin..
-'todo: ipc server in vb ide addin to allow for remote process to add files to work space?
-
-
 Private Sub cboLang_Click()
     
     Dim txt As String, lang_id As Long
+    Dim li As ListItem
     
     txt = cboLang.Text
-    
     lang_id = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
 
-    Set rs = cn.Execute("Select * from CodeDB where lang_id=" & lang_id & " and isFile=" & IIf(optFile.Value, 1, 0))
-    List1.Clear
+    Set rs = cn.Execute("Select * from CodeDB where lang_id=" & lang_id & " and isFile=" & IIf(optFile.value, 1, 0))
+    lv.Clear
     
     If rs.BOF And rs.EOF Then Exit Sub
     
     rs.MoveFirst
     
     While Not rs.EOF
-        List1.AddItem rs.Fields("NAME").Value & String(80, " ") & "@" & rs.Fields("ID").Value
+        Set li = lv.AddItem(rs.Fields("NAME").value)
+        li.Tag = rs.Fields("ID").value
         rs.MoveNext
     Wend
     
     rs.Close
-    
     
 End Sub
 
@@ -355,31 +304,10 @@ Private Sub cmdBrowse_Click()
     If Len(p) > 0 Then txtFile = p
 End Sub
 
-Private Sub cmdDelete_Click()
-    Dim txt As String, cid
-    
-    If MsgBox("Are you sure you want to delete this entry?", vbYesNo) = vbNo Then Exit Sub
-    
-    If lstFilter.Visible Then
-        txt = lstFilter.List(lstFilter.ListIndex)
-    Else
-        txt = List1.List(List1.ListIndex)
-    End If
-    
-    If Len(txt) = 0 Then
-        'they did not select an entry, but there is only one filtered result so thats it..
-        'user action: the entered a filter, saw one result and hit return
-        If lstFilter.Visible And lstFilter.ListCount = 1 Then
-            txt = lstFilter.List(0)
-        End If
-    End If
-    
-    If Len(txt) = 0 Then Exit Sub
-    cid = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
-    
-    cn.Execute "Delete from CodeDB where ID=" & cid
+
+Private Sub lv_ItemDeleted(Item As MSComctlLib.ListItem, cancel As Boolean)
+    cn.Execute "Delete from CodeDB where ID=" & Item.Tag
     cboLang_Click
-    
 End Sub
 
 Private Sub cmdIPCTest_Click()
@@ -444,7 +372,11 @@ Private Sub Form_Load()
     
     Dim cmd As String, a As Long
     
-    'cmdIPCTest.Visible = IsIde()
+    lv.SetColumnHeaders "name*"
+    lv.MultiSelect = False
+    lv.AllowDelete = True
+    
+    fraAdd.Move lv.Left, lv.top, Me.Width - 400, Text2.Height
     
     cmd = Replace(Command, """", Empty)
     a = InStr(cmd, "hwnd=")
@@ -459,12 +391,7 @@ Private Sub Form_Load()
     If FileExists(cmd) Then
         projDir = GetParentFolder(cmd)
     End If
-    
-    With List1
-        lstFilter.Move .Left, .top, .Width, .Height
-        fraAdd.Move .Left, .top, Me.Width - 400, Text2.Height
-    End With
-    
+
     cn.ConnectionString = "Provider=MSDASQL;Driver={Microsoft Access Driver (*.mdb)};DBQ=" & App.path & "\db1.mdb;"
     cn.Open
     
@@ -472,7 +399,7 @@ Private Sub Form_Load()
 
     cboLang.Clear
     While Not rs.EOF
-        cboLang.AddItem rs.Fields("lang").Value & String(80, " ") & "@" & rs.Fields("autoid").Value
+        cboLang.AddItem rs.Fields("lang").value & String(80, " ") & "@" & rs.Fields("autoid").value
         rs.MoveNext
     Wend
     
@@ -482,7 +409,7 @@ Private Sub Form_Load()
 oops: MsgBox Err.Description
 End Sub
 
-Private Sub Form_Unload(Cancel As Integer)
+Private Sub Form_Unload(cancel As Integer)
     On Error Resume Next
     cn.Close
 End Sub
@@ -510,19 +437,15 @@ Sub AddFile()
     n = FileNameFromPath(txtFile)
     txt = cboLang.Text
     lang_id = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
-    
-    Dim rs As New ADODB.Recordset
-     
-    
+ 
     rs.Open "SELECT * FROM CODEDB", cn, adOpenKeyset, adLockOptimistic
     rs.AddNew
-    rs.Fields("NAME").Value = n
-    rs.Fields("lang_id").Value = lang_id
-    rs.Fields("isFile").Value = 1
+    rs.Fields("NAME").value = n
+    rs.Fields("lang_id").value = lang_id
+    rs.Fields("isFile").value = 1
     SaveFileToDB txtFile, rs, "CODE"
     rs.Update
     rs.Close
-    
     
 End Sub
 
@@ -579,7 +502,7 @@ SaveFileToDB = True
 ErrorHandler:
 End Function
 
-Public Function LoadFileFromDB(FileName As String, rs As Object, FieldName As String) As Boolean
+Public Function LoadFileFromDB(FileName As String, rs As Object, FieldName As String, Optional ByRef emsg As String) As Boolean
 '************************************************
 'PURPOSE: LOADS BINARY DATA IN RECORDSET RS,
 'FIELD FieldName TO a File Named by the FileName parameter
@@ -605,19 +528,23 @@ Dim lFileLength As Long
 Dim abBytes() As Byte
 Dim iCtr As Integer
 
-On Error GoTo ErrorHandler
-If Not TypeOf rs Is ADODB.Recordset Then Exit Function
-
-iFileNum = FreeFile
-Open FileName For Binary As #iFileNum
-lFileLength = LenB(rs(FieldName))
-
-abBytes = rs(FieldName).GetChunk(lFileLength)
-Put #iFileNum, , abBytes()
-Close #iFileNum
-LoadFileFromDB = True
-
+    On Error GoTo ErrorHandler
+    If Not TypeOf rs Is ADODB.Recordset Then Exit Function
+    
+    iFileNum = FreeFile
+    Open FileName For Binary As #iFileNum
+    lFileLength = LenB(rs(FieldName))
+    abBytes = rs(FieldName).GetChunk(lFileLength)
+    Put #iFileNum, , abBytes()
+    Close #iFileNum
+    
+    LoadFileFromDB = True
+    Exit Function
+    
 ErrorHandler:
+    On Error Resume Next
+    emsg = Err.Description
+    Close #iFileNum
 End Function
 
 Private Sub AddNewCode()
@@ -634,10 +561,10 @@ Private Sub AddNewCode()
 
     rs.Open "SELECT * FROM CODEDB", cn, adOpenKeyset, adLockOptimistic
     rs.AddNew
-    rs.Fields("NAME").Value = Text3
-    rs.Fields("CODE").Value = Text4
-    rs.Fields("lang_id").Value = lang_id
-    rs.Fields("isFile").Value = 0
+    rs.Fields("NAME").value = Text3
+    rs.Fields("CODE").value = Text4
+    rs.Fields("lang_id").value = lang_id
+    rs.Fields("isFile").value = 0
     rs.Update
     rs.Close
     cboLang_Click
@@ -657,57 +584,42 @@ End Sub
 
 Private Sub CopyCode()
  
-    Dim tmp As String
-    Dim adors As New ADODB.Recordset
+    Dim tmp As String, emsg As String
     Dim txt As String, cid
+    Dim rs As New Recordset
+    'On Error Resume Next
     
     loadedFile = Empty
     loadedFileText = Empty
     cmdSaveFile.Enabled = False
+    Close 'all open file handles..
     
-    If lstFilter.Visible Then
-        txt = lstFilter.List(lstFilter.ListIndex)
-    Else
-        txt = List1.List(List1.ListIndex)
-    End If
+    If lv.selItem Is Nothing Then Exit Sub
     
-    If Len(txt) = 0 Then
-        'they did not select an entry, but there is only one filtered result so thats it..
-        'user action: the entered a filter, saw one result and hit return
-        If lstFilter.Visible And lstFilter.ListCount = 1 Then
-            txt = lstFilter.List(0)
-        End If
-    End If
+    cid = lv.selItem.Tag
     
-    If Len(txt) = 0 Then Exit Sub
-    
-    cid = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
-    
-    If optFile.Value Then
-        
-        adors.Open "SELECT * FROM CodeDB where ID=" & cid, cn, adOpenKeyset, adLockOptimistic
-        tmp = Environ("temp") & "\tmp.code"
+    If optFile.value Then
+        rs.Open "SELECT * FROM CodeDB where id=" & cid, cn, adOpenKeyset, adLockOptimistic
+        tmp = GetFreeFileName()
         If FileExists(tmp) Then Kill tmp
-        LoadFileFromDB tmp, adors, "CODE"
-        If FileExists(tmp) Then
-            loadedFile = Trim(Mid(txt, 1, InStr(txt, "@") - 1))
-            loadedFileText = stripAnyFromEnd(ReadFile(tmp), vbCr, vbLf, Chr(0))
-            Text2 = loadedFileText
-            Kill tmp
-            Text2.selStart = 1
-            cmdSaveFile.Enabled = True
+        If LoadFileFromDB(tmp, rs, "CODE", emsg) Then
+            If FileExists(tmp) Then
+                loadedFile = lv.selItem.Text
+                loadedFileText = stripAnyFromEnd(ReadFile(tmp), vbCr, vbLf, Chr(0))
+                Text2 = loadedFileText
+                Kill tmp
+                Text2.selStart = 1
+                cmdSaveFile.Enabled = True
+            End If
+        Else
+            MsgBox "Error loading file from db" & emsg
         End If
-        adors.Close
+        rs.Close
     Else
-        
-        adors.Open "SELECT * FROM CodeDB where ID=" & cid, cn, adOpenKeyset, adLockOptimistic
-        Text2.Text = Text2.Text & vbCrLf & vbCrLf & adors("CODE")
+        Set rs = cn.Execute("SELECT * FROM CodeDB where ID=" & cid)
+        Text2.Text = Text2.Text & vbCrLf & vbCrLf & rs("CODE")
     End If
-    
-    
-    
-    
-    
+
 End Sub
 
 Function firstLine(it)
@@ -722,6 +634,20 @@ End Sub
 
 
 
+Private Sub lv_BeforeDelete(cancel As Boolean)
+    If MsgBox("Are you sure you want to delete " & lv.selCount & " items?", vbYesNo) = vbNo Then
+        cancel = True
+    End If
+End Sub
+
+Private Sub lv_Click()
+    CopyCode
+End Sub
+ 
+Private Sub lv_UserHitReturnInFilter()
+    CopyCode
+End Sub
+
 Private Sub mnuAddCode_Click()
     fraAdd.Visible = True
 End Sub
@@ -733,8 +659,6 @@ End Sub
 Private Sub mnuStrings_Click()
     frmLazy.Show
 End Sub
-
- 
 
 Private Sub optFile_Click()
     cboLang_Click
@@ -760,39 +684,7 @@ Private Sub Text4_DblClick()
     If c <> Empty Then Text4 = c: Command1_Click 0
 End Sub
 
-Private Sub Text1_Change()
-
-    Dim i As Long
-    'List1.ListIndex = SendMessage(List1.hwnd, LB_FINDSTRING, -1, ByVal CStr(Text1.Text))
-    
-    If Len(Text1) = 0 Then
-        lstFilter.Visible = False
-    Else
-        lstFilter.Visible = True
-        lstFilter.Clear
-        For i = 0 To List1.ListCount - 1
-            If InStr(1, List1.List(i), Text1, vbTextCompare) > 0 Then
-                lstFilter.AddItem List1.List(i)
-            End If
-        Next
-    End If
-    
-        
-End Sub
-
-Private Sub Text1_KeyDown(KeyCode As Integer, Shift As Integer)
-    If KeyCode = 13 Then Call CopyCode
-End Sub
-
-Private Sub List1_DblClick()
-    Call CopyCode
-End Sub
-
-Private Sub lstFilter_Click()
-    Call CopyCode
-End Sub
-
-Private Sub txtFile_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, Y As Single)
+Private Sub txtFile_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
     txtFile.Text = Data.Files(1)
 End Sub
 
@@ -825,7 +717,67 @@ Function ReadFile(FileName)
    ReadFile = temp
 End Function
 
+Function FolderExists(path As String) As Boolean
+  On Error GoTo hell
+  Dim tmp As String
+  tmp = path & "\"
+  If Len(tmp) = 1 Then Exit Function
+  If Dir(tmp, vbDirectory) <> "" Then FolderExists = True
+  Exit Function
+hell:
+    FolderExists = False
+End Function
 
+Function GetFreeFileName(Optional ByVal folder As String, Optional extension = ".txt") As String
+    
+    On Error GoTo handler 'can have overflow err once in awhile :(
+    Dim i As Integer
+    Dim tmp As String
+
+    If Len(folder) = 0 Then folder = Environ("temp")
+    If Not FolderExists(folder) Then Exit Function
+    If Right(folder, 1) <> "\" Then folder = folder & "\"
+    If Left(extension, 1) <> "." Then extension = "." & extension
+    
+again:
+    Do
+      tmp = folder & RandomNum() & extension
+    Loop Until Not FileExists(tmp)
+    
+    GetFreeFileName = tmp
+    
+Exit Function
+handler:
+
+    If i < 10 Then
+        i = i + 1
+        GoTo again
+    End If
+    
+End Function
+
+Function RandomNum() As Long
+    Dim tmp As Long
+    Dim tries As Long
+    
+    On Error Resume Next
+
+    Do While 1
+        Err.Clear
+        Randomize
+        tmp = Round(Timer * Now * Rnd(), 0)
+        RandomNum = tmp
+        If Err.Number = 0 Then Exit Function
+        If tries < 100 Then
+            tries = tries + 1
+        Else
+            Exit Do
+        End If
+    Loop
+    
+    RandomNum = GetTickCount
+    
+End Function
 
 Function FileNameFromPath(fullpath) As String
     Dim tmp
