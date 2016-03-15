@@ -318,10 +318,10 @@ End Sub
 Private Sub cmdUpdate_Click()
      On Error Resume Next
      
-     If Len(txtBuildPath) = 0 Then
-        MsgBox "You must enter a valid path including file name and extension", vbExclamation
-        Exit Sub
-     End If
+     'If Len(txtBuildPath) = 0 Then
+     '   MsgBox "You must enter a valid path including file name and extension", vbExclamation
+     '   Exit Sub
+     'End If
      
      txtBuildPath = Replace(txtBuildPath, "/", "\")
      

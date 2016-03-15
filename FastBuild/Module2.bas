@@ -62,6 +62,31 @@ Public Declare Function GetCurrentProcessId Lib "kernel32" () As Long
      
     Private Declare Function GetOpenFileName Lib "comdlg32.dll" Alias "GetOpenFileNameA" (pOpenfilename As OPENFILENAME) As Long
 
+Function IPCCommand(msg As String)
+    On Error GoTo hell
+    
+    Dim cmd As String
+    Dim a As Long
+    
+    a = InStr(msg, ":")
+    If a < 1 Then Exit Function
+    
+    cmd = LCase(Mid(msg, 1, a))
+    msg = Mid(msg, a + 1)
+    
+    If cmd = "add:" Then
+        If FileExists(msg) Then
+            VBInstance.ActiveVBProject.VBComponents.AddFile msg
+        Else
+            MsgBox "Can not add file, File not found: " & msg, vbInformation
+        End If
+    End If
+    
+   Exit Function
+hell:
+    MsgBox "Error in IpcCommand: " & Err.Description, vbInformation
+End Function
+
 Function ShowOpenMultiSelect(Optional hwnd As Long) As String()
     Dim tOPENFILENAME As OPENFILENAME
     Dim lResult As Long

@@ -212,6 +212,7 @@ Private Sub AddinInstance_OnConnection(ByVal Application As Object, ByVal Connec
             Set mnuImmediate = VBInstance.Events.CommandBarEvents(mcbImmediate)
         End If
                 
+        Load frmIPC
     End If
 
     Exit Sub
@@ -315,11 +316,20 @@ Private Sub FileEvents_AfterWriteFile(ByVal VBProject As VBIDE.VBProject, ByVal 
     
     Dim postbuild As String
     Dim buildOutput As String
+    Dim tmp As String, t2 As String
     
     If FileType <> vbext_ft_Exe Then Exit Sub
            
     If Not isBuildPathSet() Then
-        VBInstance.ActiveVBProject.WriteProperty "fastBuild", "fullPath", FileName
+        tmp = GetParentFolder(VBInstance.ActiveVBProject.FileName)
+        t2 = GetParentFolder(FileName)
+        If InStr(1, tmp, t2) > 0 Then
+            tmp = Replace(FileName, tmp, "%ap%\")
+            tmp = Replace(tmp, "\\", "\")
+        Else
+            tmp = FileName
+        End If
+        VBInstance.ActiveVBProject.WriteProperty "fastBuild", "fullPath", tmp
     End If
     
     LastCommandOutput = Empty
@@ -362,6 +372,8 @@ Private Sub FileEvents_DoGetNewFileName(ByVal VBProject As VBIDE.VBProject, ByVa
         Exit Sub
     End If
     
+    On Error Resume Next
+    fastBuildPath = Replace(fastBuildPath, "%AP%", GetParentFolder(VBInstance.ActiveVBProject.FileName), , , vbTextCompare)
     pf = GetParentFolder(fastBuildPath)
     
     If FolderExists(pf) Then
@@ -419,8 +431,14 @@ End Sub
 
 Private Sub mnuCodeDB_Click(ByVal CommandBarControl As Object, handled As Boolean, CancelDefault As Boolean)
     On Error Resume Next
+    Dim cmdLine As String
+    
     If FileExists(CodeDBExe) Then
-        Shell CodeDBExe, vbNormalFocus
+        If Not VBInstance.ActiveVBProject Is Nothing Then
+            cmdLine = " """ & VBInstance.ActiveVBProject.FileName & """"
+        End If
+        cmdLine = cmdLine & " hwnd=" & frmIPC.txtIPCServer.hwnd
+        Shell CodeDBExe & cmdLine, vbNormalFocus
     Else
         MsgBox "File not found: " & CodeDBExe
     End If

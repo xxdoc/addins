@@ -19,8 +19,8 @@ Begin VB.Form frmAddIn
       Width           =   690
    End
    Begin VB.CommandButton cmdSaveFile 
-      Caption         =   "Save File"
-      Height          =   240
+      Caption         =   "Add File"
+      Height          =   285
       Left            =   9450
       TabIndex        =   22
       Top             =   6300
@@ -34,6 +34,14 @@ Begin VB.Form frmAddIn
       Top             =   540
       Visible         =   0   'False
       Width           =   8700
+      Begin VB.CommandButton cmdIPCTest 
+         Caption         =   "IPC Test"
+         Height          =   330
+         Left            =   270
+         TabIndex        =   24
+         Top             =   1845
+         Width           =   960
+      End
       Begin VB.CommandButton cmdBrowse 
          Caption         =   ".."
          Height          =   240
@@ -295,7 +303,8 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-
+Private Declare Function PostMessage Lib "user32" Alias "PostMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Function IsWindow Lib "user32" (ByVal hwnd As Long) As Long
 Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Any) As Long
 Const LB_FINDSTRING = &H18F
 
@@ -305,6 +314,11 @@ Dim cn As New ADODB.Connection
 Dim loadedFile As String
 Dim loadedFileText As String
 Dim projDir As String
+Dim hAddin As Long
+
+Enum cmdTypes
+    ct_addFile
+End Enum
 
 'todo: load projDir from command passed in from addin..
 'todo: ipc server in vb ide addin to allow for remote process to add files to work space?
@@ -368,19 +382,83 @@ Private Sub cmdDelete_Click()
     
 End Sub
 
+Private Sub cmdIPCTest_Click()
+
+    Const WM_PASTE = &H302
+    
+    If IsWindow(hAddin) = 0 Then
+        MsgBox "Parent form closed? Hwnd not found? we could rescan but not here.."
+        Exit Sub
+    End If
+    
+    Clipboard.Clear
+    Clipboard.SetText InputBox("Send:", , "test")
+    PostMessage hAddin, WM_PASTE, 0, 0
+    
+End Sub
+
+Function SendIPCCommand(cmdType As cmdTypes, msg As String)
+    
+    Const WM_PASTE = &H302
+    Dim tmp As String
+    
+    If hAddin = 0 Then Exit Function
+    
+    If IsWindow(hAddin) = 0 Then
+        MsgBox "Parent form closed? Hwnd not found? we could rescan but not here.."
+        Exit Function
+    End If
+    
+    Select Case cmdType
+        Case ct_addFile: tmp = "add:"
+    End Select
+    
+    If Len(tmp) = 0 Then
+        MsgBox "dev error unknown cmd type"
+        Exit Function
+    End If
+    
+    tmp = tmp & msg
+
+    Clipboard.Clear
+    Clipboard.SetText tmp
+    PostMessage hAddin, WM_PASTE, 0, 0
+
+End Function
+
 Private Sub cmdSaveFile_Click()
     On Error GoTo hell
     Dim p As String
     p = dlg.SaveDialog(AllFiles, projDir, "Save As", , Me.hwnd, loadedFile)
     If Len(p) = 0 Then Exit Sub
     WriteFile p, loadedFileText
+    SendIPCCommand ct_addFile, p
     Exit Sub
 hell:
     MsgBox Err.Description
 End Sub
 
 Private Sub Form_Load()
+    
+    On Error Resume Next
+    
+    Dim cmd As String, a As Long
+    
+    'cmdIPCTest.Visible = IsIde()
+    
+    cmd = Replace(Command, """", Empty)
+    a = InStr(cmd, "hwnd=")
+    
+    If a > 0 Then
+        hAddin = CLng(Mid(cmd, a + 5))
+        cmd = Trim(Mid(cmd, 1, a))
+    End If
+        
     On Error GoTo oops
+    
+    If FileExists(cmd) Then
+        projDir = GetParentFolder(cmd)
+    End If
     
     With List1
         lstFilter.Move .Left, .top, .Width, .Height

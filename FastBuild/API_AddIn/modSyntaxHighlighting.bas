@@ -405,8 +405,8 @@ Private Sub UnlockUpdate()
     End If
 End Sub
 
-Private Function SendMsg(Msg As tmMsgs, Optional wParam As Long = 0, Optional lParam = 0) As Long
-    SendMsg = SendMessage(mrtf.hwnd, Msg, wParam, lParam)
+Private Function SendMsg(msg As tmMsgs, Optional wParam As Long = 0, Optional lParam = 0) As Long
+    SendMsg = SendMessage(mrtf.hwnd, msg, wParam, lParam)
 End Function
 
 Private Function lineCount() As Long
@@ -454,4 +454,21 @@ Function stripAnyFromEnd(ByVal base, ParamArray chars())
         
         stripAnyFromEnd = base
         
+End Function
+
+Function GetParentFolder(path) As String
+    Dim tmp, ub
+    On Error Resume Next
+    tmp = Split(path, "\")
+    ub = tmp(UBound(tmp))
+    GetParentFolder = Replace(Join(tmp, "\"), "\" & ub, "")
+End Function
+
+
+
+Function IsIde() As Boolean
+' Brad Martinez  http://www.mvps.org/ccrp
+    On Error GoTo out
+    Debug.Print 1 / 0
+out: IsIde = Err
 End Function
