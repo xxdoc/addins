@@ -255,7 +255,6 @@ Begin VB.Form frmAddIn
       _ExtentX        =   14870
       _ExtentY        =   10663
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   3
       RightMargin     =   50000
       TextRTF         =   $"frmAddIn.frx":0000
@@ -295,26 +294,18 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
 Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Any) As Long
 Const LB_FINDSTRING = &H18F
 
-#Const IS_ADDIN = False
-
-#If IS_ADDIN Then
-    Public VBInstance As VBIDE.VBE
-    Public Connect As Connect
-#End If
-
-Dim ws As Workspace
-Dim db As Database
-Dim rs As Recordset
+Dim rs As ADODB.Recordset
 Dim dlg As New clsCmnDlg2
 Dim cn As New ADODB.Connection
 Dim loadedFile As String
 Dim loadedFileText As String
 Dim projDir As String
 
-'todo: switch over to ado completely..
 'todo: load projDir from command passed in from addin..
 'todo: ipc server in vb ide addin to allow for remote process to add files to work space?
 
@@ -326,10 +317,7 @@ Private Sub cboLang_Click()
     txt = cboLang.Text
     
     lang_id = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
-      
-    Dim rs As ADODB.Recordset
-    If cn.State <> 1 Then cn.Open
-    
+
     Set rs = cn.Execute("Select * from CodeDB where lang_id=" & lang_id & " and isFile=" & IIf(optFile.Value, 1, 0))
     List1.Clear
     
@@ -343,7 +331,7 @@ Private Sub cboLang_Click()
     Wend
     
     rs.Close
-    cn.Close
+    
     
 End Sub
 
@@ -354,6 +342,7 @@ Private Sub cmdBrowse_Click()
 End Sub
 
 Private Sub cmdDelete_Click()
+    Dim txt As String, cid
     
     If MsgBox("Are you sure you want to delete this entry?", vbYesNo) = vbNo Then Exit Sub
     
@@ -374,9 +363,7 @@ Private Sub cmdDelete_Click()
     If Len(txt) = 0 Then Exit Sub
     cid = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
     
-    If cn.State <> 1 Then cn.Open
     cn.Execute "Delete from CodeDB where ID=" & cid
-    cn.Close
     cboLang_Click
     
 End Sub
@@ -401,12 +388,10 @@ Private Sub Form_Load()
     End With
     
     cn.ConnectionString = "Provider=MSDASQL;Driver={Microsoft Access Driver (*.mdb)};DBQ=" & App.path & "\db1.mdb;"
-
-    Set ws = DBEngine.Workspaces(0)
-    Set db = ws.OpenDatabase(App.path & "\db1.mdb")
+    cn.Open
     
-    Set rs = db.OpenRecordset("langs", dbOpenDynaset)
-    rs.MoveFirst
+    Set rs = cn.Execute("Select * from langs")
+
     cboLang.Clear
     While Not rs.EOF
         cboLang.AddItem rs.Fields("lang").Value & String(80, " ") & "@" & rs.Fields("autoid").Value
@@ -420,8 +405,8 @@ oops: MsgBox Err.Description
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
-    rs.Close: db.Close: ws.Close
-    Set rs = Nothing: Set db = Nothing: Set ws = Nothing
+    On Error Resume Next
+    cn.Close
 End Sub
 
 Private Sub Command1_Click(Index As Integer)
@@ -430,9 +415,6 @@ Private Sub Command1_Click(Index As Integer)
         Case 0: Call extract
         Case 1: Call AddFile
         Case 2: Call AddNewCode: Text3 = Empty: Text4 = Empty
-                
-        'Case 2: Call comment
-        'Case 3: Call comment(False)
         Case 4: Clipboard.Clear: Clipboard.SetText Text2.Text
         Case 5: Text2.Text = Empty
     End Select
@@ -453,7 +435,7 @@ Sub AddFile()
     
     Dim rs As New ADODB.Recordset
      
-    If cn.State <> 1 Then cn.Open
+    
     rs.Open "SELECT * FROM CODEDB", cn, adOpenKeyset, adLockOptimistic
     rs.AddNew
     rs.Fields("NAME").Value = n
@@ -462,7 +444,7 @@ Sub AddFile()
     SaveFileToDB txtFile, rs, "CODE"
     rs.Update
     rs.Close
-    cn.Close
+    
     
 End Sub
 
@@ -571,19 +553,22 @@ Private Sub AddNewCode()
     
     txt = cboLang.Text
     lang_id = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
-    
-    q = Chr(34) 'quote
-    dq = Chr(34) & Chr(34)
-    v = """" & Replace(Text3, q, dq) & """,""" & Replace(Text4, q, dq) & """"
-    sSQL = "INSERT INTO CodeDB (NAME,CODE,lang_id) VALUES(" & v & ", " & lang_id & ");"
-    db.Execute sSQL
-    
+
+    rs.Open "SELECT * FROM CODEDB", cn, adOpenKeyset, adLockOptimistic
+    rs.AddNew
+    rs.Fields("NAME").Value = Text3
+    rs.Fields("CODE").Value = Text4
+    rs.Fields("lang_id").Value = lang_id
+    rs.Fields("isFile").Value = 0
+    rs.Update
+    rs.Close
     cboLang_Click
    
 End Sub
 
 Private Sub extract()
     On Error Resume Next
+    Dim tmp As String, fs
     If Text4 = Empty Then MsgBox "Ughh need function to extract name from!": Exit Sub
     tmp = firstLine(Text4)
     fs = InStrRev(tmp, " ", InStr(tmp, "("))
@@ -592,27 +577,11 @@ Private Sub extract()
     Text3 = tmp
 End Sub
 
-'Private Sub comment(Optional out As Boolean = True)
-'    'basic outline of sub from Palidan on pscode
-'    Dim StartLine As Long, StartColumn As Long, EndLine As Long, EndColumn As Long
-'    VBInstance.ActiveCodePane.GetSelection StartLine, StartColumn, EndLine, EndColumn
-'    If StartLine = EndLine And StartColumn = EndColumn Then Exit Sub
-'    For i = StartLine To EndLine
-'        If i = EndLine And EndColumn = 1 Then Exit For
-'        l = VBInstance.ActiveCodePane.CodeModule.Lines(i, 1)
-'        If out Then
-'            VBInstance.ActiveCodePane.CodeModule.ReplaceLine i, "'" + l
-'        Else
-'            VBInstance.ActiveCodePane.CodeModule.ReplaceLine i, Mid(l, 2)
-'        End If
-'    Next
-'    Connect.Hide
-'End Sub
-
 Private Sub CopyCode()
  
     Dim tmp As String
     Dim adors As New ADODB.Recordset
+    Dim txt As String, cid
     
     loadedFile = Empty
     loadedFileText = Empty
@@ -637,14 +606,14 @@ Private Sub CopyCode()
     cid = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
     
     If optFile.Value Then
-        If cn.State <> 1 Then cn.Open
+        
         adors.Open "SELECT * FROM CodeDB where ID=" & cid, cn, adOpenKeyset, adLockOptimistic
         tmp = Environ("temp") & "\tmp.code"
         If FileExists(tmp) Then Kill tmp
         LoadFileFromDB tmp, adors, "CODE"
         If FileExists(tmp) Then
             loadedFile = Trim(Mid(txt, 1, InStr(txt, "@") - 1))
-            loadedFileText = ReadFile(tmp)
+            loadedFileText = stripAnyFromEnd(ReadFile(tmp), vbCr, vbLf, Chr(0))
             Text2 = loadedFileText
             Kill tmp
             Text2.selStart = 1
@@ -652,18 +621,19 @@ Private Sub CopyCode()
         End If
         adors.Close
     Else
-        If cn.State <> 1 Then cn.Open
+        
         adors.Open "SELECT * FROM CodeDB where ID=" & cid, cn, adOpenKeyset, adLockOptimistic
         Text2.Text = Text2.Text & vbCrLf & vbCrLf & adors("CODE")
     End If
     
-    cn.Close
+    
     
     
     
 End Sub
 
 Function firstLine(it)
+    Dim t
     t = Split(it, vbCrLf)
     firstLine = t(0)
 End Function
@@ -707,19 +677,20 @@ Private Sub Text4_Change()
 End Sub
 
 Private Sub Text4_DblClick()
+    Dim c
     c = Clipboard.GetText
     If c <> Empty Then Text4 = c: Command1_Click 0
 End Sub
 
 Private Sub Text1_Change()
 
+    Dim i As Long
     'List1.ListIndex = SendMessage(List1.hwnd, LB_FINDSTRING, -1, ByVal CStr(Text1.Text))
     
     If Len(Text1) = 0 Then
         lstFilter.Visible = False
     Else
         lstFilter.Visible = True
-        Dim i As Long
         lstFilter.Clear
         For i = 0 To List1.ListCount - 1
             If InStr(1, List1.List(i), Text1, vbTextCompare) > 0 Then
@@ -747,9 +718,6 @@ Private Sub txtFile_OLEDragDrop(Data As DataObject, Effect As Long, Button As In
     txtFile.Text = Data.Files(1)
 End Sub
 
-
-
-
 Function FileExists(path As String) As Boolean
   On Error GoTo hell
     
@@ -762,6 +730,7 @@ hell: FileExists = False
 End Function
 
 Sub WriteFile(path, it)
+    Dim f As Long
     f = FreeFile
     Open path For Output As #f
     Print #f, it
@@ -769,6 +738,7 @@ Sub WriteFile(path, it)
 End Sub
 
 Function ReadFile(FileName)
+    Dim f As Long, temp
   f = FreeFile
   temp = ""
    Open FileName For Binary As #f        ' Open file.(can be text or image)
@@ -780,6 +750,7 @@ End Function
 
 
 Function FileNameFromPath(fullpath) As String
+    Dim tmp
     If InStr(fullpath, "\") > 0 Then
         tmp = Split(fullpath, "\")
         FileNameFromPath = CStr(tmp(UBound(tmp)))

@@ -437,3 +437,21 @@ Private Sub ScrollIncremental(Optional horz As Long = 0, Optional vert As Long =
 
 End Sub
 
+Function stripAnyFromEnd(ByVal base, ParamArray chars())
+        
+        Dim hadResult As Boolean
+        Dim c
+        
+        Do
+            hadResult = False
+            For Each c In chars
+                If LCase(Right(base, 1)) = LCase(c) Then
+                    base = Mid(base, 1, Len(base) - Len(c))
+                    hadResult = True
+                End If
+            Next
+        Loop While hadResult
+        
+        stripAnyFromEnd = base
+        
+End Function
