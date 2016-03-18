@@ -10,11 +10,11 @@ Begin VB.Form frmAddIn
    ScaleHeight     =   6735
    ScaleWidth      =   13095
    StartUpPosition =   2  'CenterScreen
-   Begin VB.CommandButton cmdSaveFile 
+   Begin VB.CommandButton cmdAddFile 
       Caption         =   "Add File"
       Height          =   285
-      Left            =   9450
-      TabIndex        =   19
+      Left            =   9945
+      TabIndex        =   17
       Top             =   6300
       Width           =   915
    End
@@ -30,34 +30,9 @@ Begin VB.Form frmAddIn
          Caption         =   "IPC Test"
          Height          =   330
          Left            =   270
-         TabIndex        =   20
+         TabIndex        =   15
          Top             =   1845
          Width           =   960
-      End
-      Begin VB.CommandButton cmdBrowse 
-         Caption         =   ".."
-         Height          =   240
-         Left            =   5355
-         TabIndex        =   18
-         Top             =   4500
-         Width           =   240
-      End
-      Begin VB.CommandButton Command1 
-         Caption         =   "Add File"
-         Height          =   240
-         Index           =   1
-         Left            =   5625
-         TabIndex        =   17
-         Top             =   4500
-         Width           =   915
-      End
-      Begin VB.TextBox txtFile 
-         Height          =   285
-         Left            =   855
-         OLEDropMode     =   1  'Manual
-         TabIndex        =   16
-         Top             =   4500
-         Width           =   4470
       End
       Begin VB.TextBox Text3 
          BeginProperty Font 
@@ -94,13 +69,13 @@ Begin VB.Form frmAddIn
          Width           =   6660
       End
       Begin VB.CommandButton Command1 
-         Caption         =   "Extract"
+         Caption         =   "Extract Prototype"
          Height          =   255
          Index           =   0
-         Left            =   6615
+         Left            =   5805
          TabIndex        =   9
          Top             =   4500
-         Width           =   855
+         Width           =   1620
       End
       Begin VB.CommandButton Command1 
          Caption         =   "Add"
@@ -112,18 +87,18 @@ Begin VB.Form frmAddIn
          Width           =   855
       End
       Begin VB.Label Label1 
-         Caption         =   "Add File"
+         Caption         =   "Double click body textbox to paste and parse prototype"
          Height          =   285
-         Left            =   90
-         TabIndex        =   15
+         Left            =   1575
+         TabIndex        =   18
          Top             =   4500
-         Width           =   1005
+         Width           =   3930
       End
       Begin VB.Label lblClose 
          Caption         =   "X"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   12
+            Size            =   18
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -222,7 +197,7 @@ Begin VB.Form frmAddIn
    Begin Codedb.ucFilterList lv 
       Height          =   6495
       Left            =   90
-      TabIndex        =   21
+      TabIndex        =   16
       Top             =   135
       Width           =   4290
       _ExtentX        =   7567
@@ -238,14 +213,20 @@ Begin VB.Form frmAddIn
    End
    Begin VB.Menu mnuTools 
       Caption         =   "Tools"
-      Begin VB.Menu mnuStrings 
-         Caption         =   "Strings"
-      End
       Begin VB.Menu mnuAddCode 
          Caption         =   "Add Code"
       End
+      Begin VB.Menu mnuSaveFile 
+         Caption         =   "Add New File to DB (drop on lv)"
+      End
+      Begin VB.Menu mnuSpacer 
+         Caption         =   "-"
+      End
+      Begin VB.Menu mnuStrings 
+         Caption         =   "String Tools"
+      End
       Begin VB.Menu mnuAdoConstr 
-         Caption         =   "Ado ConStr"
+         Caption         =   "Connection Str Builder"
       End
    End
 End
@@ -298,10 +279,11 @@ Private Sub cboLang_Click()
     
 End Sub
 
-Private Sub cmdBrowse_Click()
+Private Sub mnuSaveFile_Click()
     Dim p As String
     p = dlg.OpenDialog(AllFiles, , , Me.hwnd)
-    If Len(p) > 0 Then txtFile = p
+    If Len(p) = 0 Then Exit Sub
+    AddFile p
 End Sub
 
 
@@ -354,9 +336,10 @@ Function SendIPCCommand(cmdType As cmdTypes, msg As String)
 
 End Function
 
-Private Sub cmdSaveFile_Click()
+Private Sub cmdAddFile_Click()
     On Error GoTo hell
     Dim p As String
+    If Len(loadedFileText) = 0 Then Exit Sub
     p = dlg.SaveDialog(AllFiles, projDir, "Save As", , Me.hwnd, loadedFile)
     If Len(p) = 0 Then Exit Sub
     WriteFile p, loadedFileText
@@ -372,9 +355,12 @@ Private Sub Form_Load()
     
     Dim cmd As String, a As Long
     
+    cmdAddFile.Enabled = False
+    cmdIPCTest.Visible = IsIde()
     lv.SetColumnHeaders "name*"
     lv.MultiSelect = False
     lv.AllowDelete = True
+    lv.font = "tahoma"
     
     fraAdd.Move lv.Left, lv.top, Me.Width - 400, Text2.Height
     
@@ -418,7 +404,6 @@ Private Sub Command1_Click(Index As Integer)
     On Error GoTo oops
     Select Case Index
         Case 0: Call extract
-        Case 1: Call AddFile
         Case 2: Call AddNewCode: Text3 = Empty: Text4 = Empty
         Case 4: Clipboard.Clear: Clipboard.SetText Text2.Text
         Case 5: Text2.Text = Empty
@@ -427,14 +412,14 @@ Private Sub Command1_Click(Index As Integer)
 oops: MsgBox Err.Description
 End Sub
 
-Sub AddFile()
+Sub AddFile(pth As String)
     
-    If Not FileExists(txtFile) Then Exit Sub
+    If Not FileExists(pth) Then Exit Sub
     
     Dim txt As String, lang_id As Long
     Dim n As String
     
-    n = FileNameFromPath(txtFile)
+    n = FileNameFromPath(pth)
     txt = cboLang.Text
     lang_id = Mid(txt, InStrRev(txt, "@") + 1, Len(txt))
  
@@ -443,7 +428,7 @@ Sub AddFile()
     rs.Fields("NAME").value = n
     rs.Fields("lang_id").value = lang_id
     rs.Fields("isFile").value = 1
-    SaveFileToDB txtFile, rs, "CODE"
+    SaveFileToDB pth, rs, "CODE"
     rs.Update
     rs.Close
     
@@ -591,7 +576,7 @@ Private Sub CopyCode()
     
     loadedFile = Empty
     loadedFileText = Empty
-    cmdSaveFile.Enabled = False
+    cmdAddFile.Enabled = False
     Close 'all open file handles..
     
     If lv.selItem Is Nothing Then Exit Sub
@@ -609,7 +594,7 @@ Private Sub CopyCode()
                 Text2 = loadedFileText
                 Kill tmp
                 Text2.selStart = 1
-                cmdSaveFile.Enabled = True
+                cmdAddFile.Enabled = True
             End If
         Else
             MsgBox "Error loading file from db" & emsg
@@ -632,8 +617,6 @@ Private Sub lblClose_Click()
     fraAdd.Visible = False
 End Sub
 
-
-
 Private Sub lv_BeforeDelete(cancel As Boolean)
     If MsgBox("Are you sure you want to delete " & lv.selCount & " items?", vbYesNo) = vbNo Then
         cancel = True
@@ -643,7 +626,15 @@ End Sub
 Private Sub lv_Click()
     CopyCode
 End Sub
- 
+
+Private Sub lv_OleDragDrop(Data As MSComctlLib.DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+    On Error Resume Next
+    Dim f
+    For Each f In Data.Files
+        AddFile CStr(f)
+    Next
+End Sub
+
 Private Sub lv_UserHitReturnInFilter()
     CopyCode
 End Sub
@@ -662,10 +653,12 @@ End Sub
 
 Private Sub optFile_Click()
     cboLang_Click
+    cmdAddFile.Enabled = True
 End Sub
 
 Private Sub Option1_Click()
     cboLang_Click
+    cmdAddFile.Enabled = False
 End Sub
 
 Private Sub Text2_Change()
@@ -684,9 +677,7 @@ Private Sub Text4_DblClick()
     If c <> Empty Then Text4 = c: Command1_Click 0
 End Sub
 
-Private Sub txtFile_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
-    txtFile.Text = Data.Files(1)
-End Sub
+ 
 
 Function FileExists(path As String) As Boolean
   On Error GoTo hell

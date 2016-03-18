@@ -14,7 +14,6 @@ Begin VB.Form frmIPC
       Left            =   45
       TabIndex        =   0
       Top             =   45
-      Visible         =   0   'False
       Width           =   1860
    End
 End

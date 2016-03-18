@@ -213,6 +213,10 @@ Private Sub AddinInstance_OnConnection(ByVal Application As Object, ByVal Connec
         End If
                 
         Load frmIPC
+        SaveSetting "fastbuild", "ipc", "hIpc", frmIPC.txtIPCServer.hwnd
+        'frmIPC.Visible = True
+        'MsgBox Hex(frmIPC.txtIPCServer.hwnd)
+        
     End If
 
     Exit Sub

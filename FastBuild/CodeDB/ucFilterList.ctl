@@ -27,6 +27,7 @@ Begin VB.UserControl ucFilterList
       LabelEdit       =   1
       LabelWrap       =   -1  'True
       HideSelection   =   0   'False
+      OLEDropMode     =   1
       FullRowSelect   =   -1  'True
       GridLines       =   -1  'True
       _Version        =   393217
@@ -34,6 +35,7 @@ Begin VB.UserControl ucFilterList
       BackColor       =   -2147483643
       BorderStyle     =   1
       Appearance      =   1
+      OLEDropMode     =   1
       NumItems        =   0
    End
    Begin MSComctlLib.ListView lv 
@@ -48,6 +50,7 @@ Begin VB.UserControl ucFilterList
       LabelEdit       =   1
       LabelWrap       =   -1  'True
       HideSelection   =   0   'False
+      OLEDropMode     =   1
       FullRowSelect   =   -1  'True
       GridLines       =   -1  'True
       _Version        =   393217
@@ -55,6 +58,7 @@ Begin VB.UserControl ucFilterList
       BackColor       =   -2147483643
       BorderStyle     =   1
       Appearance      =   1
+      OLEDropMode     =   1
       NumItems        =   0
    End
    Begin VB.Label Label1 
@@ -142,6 +146,7 @@ Event ItemDeleted(Item As MSComctlLib.ListItem, ByRef cancel As Boolean) 'handle
 Event BeforeDelete(ByRef cancel As Boolean) 'allows you to cancel
 Event DeletesComplete(count As Long) 'if multiselect=true..then you want to know when complete..
 Event UserHitReturnInFilter() 'allows user to "select" a single item in filter list by hitting return..
+Event OleDragDrop(Data As MSComctlLib.DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
 
 #If 0 Then
     Dim x, y, Column, nextone 'force lowercase so ide doesnt switch around on its own whim...
@@ -157,7 +162,13 @@ Property Let Locked(x As Boolean)
     txtFilter.BackColor = IIf(x, &HC0C0C0, vbWhite)
     txtFilter.Enabled = Not x
 End Property
-    
+
+Property Let font(x As String)
+    On Error Resume Next
+    lv.font = x
+    lvFilter.font = x
+End Property
+
 Property Get FilterColumn() As Long
     FilterColumn = m_FilterColumn
 End Property
@@ -392,6 +403,15 @@ Private Sub lv_KeyDown(KeyCode As Integer, Shift As Integer)
              
 End Sub
 
+Private Sub lv_OleDragDrop(Data As MSComctlLib.DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+    RaiseEvent OleDragDrop(Data, Effect, Button, Shift, x, y)
+End Sub
+
+Private Sub lvFilter_OLEDragDrop(Data As MSComctlLib.DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+    RaiseEvent OleDragDrop(Data, Effect, Button, Shift, x, y)
+End Sub
+
+
 Private Sub lvFilter_KeyDown(KeyCode As Integer, Shift As Integer)
 
     Dim i As Long
@@ -430,6 +450,7 @@ Private Sub lvFilter_KeyDown(KeyCode As Integer, Shift As Integer)
     End If
              
 End Sub
+
 
 
 Private Sub mnuAlertColWidths_Click()
@@ -546,6 +567,7 @@ Private Sub txtFilter_Change()
     'should multiple (csv) filters only apply on hitting return?
     'so you can see full list to work off of?
     
+    lv.Visible = False
     lvFilter.Visible = True
     lvFilter.ListItems.Clear
     Set indexMapping = New Collection
@@ -595,6 +617,7 @@ Private Sub txtFilter_Change()
 Exit Sub
 
 hideExit:
+            lv.Visible = True
             lvFilter.Visible = False
             Exit Sub
             
@@ -711,8 +734,9 @@ End Sub
 Private Sub UserControl_Initialize()
     m_FilterColumn = -1
     m_FilterColumnPreset = -1
-    mnuAlertColWidths.Visible = isIde()
+    mnuAlertColWidths.Visible = IsIde()
 End Sub
+ 
 
 Private Sub UserControl_Resize()
     On Error Resume Next
@@ -841,11 +865,11 @@ Private Sub push(ary, value) 'this modifies parent ary object
 init:     ReDim ary(0): ary(0) = value
 End Sub
 
-Private Function isIde() As Boolean
+Private Function IsIde() As Boolean
 ' Brad Martinez  http://www.mvps.org/ccrp
     On Error GoTo out
     Debug.Print 1 / 0
-out: isIde = Err
+out: IsIde = Err
 End Function
 
 Private Sub UserControl_Terminate()

@@ -68,6 +68,8 @@ Function IPCCommand(msg As String)
     Dim cmd As String
     Dim a As Long
     
+    'MsgBox "in ipc command!"
+    
     a = InStr(msg, ":")
     If a < 1 Then Exit Function
     
@@ -82,10 +84,30 @@ Function IPCCommand(msg As String)
         End If
     End If
     
+    'this does not work when IDE is at runtime or startup :_(yet:)
+    If cmd = "cls:" Then
+        ClearImmediateWindow
+        MsgBox "cleared!" & Err.Description
+    End If
+        
+    
    Exit Function
 hell:
     MsgBox "Error in IpcCommand: " & Err.Description, vbInformation
 End Function
+
+Sub ClearImmediateWindow()
+    On Error Resume Next
+    Dim oWindow As VBIDE.Window
+1    Set oWindow = VBInstance.ActiveWindow
+2    VBInstance.Windows("Immediate").SetFocus
+3    SendKeys "^{Home}", True
+4    SendKeys "^+{End}", True
+5    SendKeys "{Del}", True
+6    If Not oWindow Is Nothing Then oWindow.SetFocus
+    
+     If Err.Number <> 0 Then MsgBox Erl & " " & Err.Description
+End Sub
 
 Function ShowOpenMultiSelect(Optional hwnd As Long) As String()
     Dim tOPENFILENAME As OPENFILENAME
