@@ -1,0 +1,6 @@
+Title: Ulli's VB Companion V 4.4.17 (bug fix)
+Description: This Add-In adds configurable mousewheel support and a few other goodies to the VB IDE. Check it out; download is only 96kB (the best 96 kB you ever downloaded *g*). ## Compile the DLL into your VB folder, use the AddIns manager to add it to the Addins menu, and then restart VB. Read the ReadMe file to learn howto. ## Features: configurable mouse wheel support independent of mouse driver - word autocomplete while you type - autotcomplete for API prototypes, constants and structures - code pane grid at tabstops to facilitate indenting - open all code panes by one mouseclick - function to compare current with previous code - copy facility to paste selected code from other projects - pasteable list of members currently in scope (forms, data and procedures) - easy multiline literal generation and modification - reset function to cancel all alterations in a module without restarting VB.
+This file came from Planet-Source-Code.com...the home millions of lines of source code
+You can view comments on this code/and or vote on it at: http://www.Planet-Source-Code.com/vb/scripts/ShowCode.asp?txtCodeId=38657&lngWId=1
+
+The author may have retained certain copyrights to this code...please observe their request and the law by reviewing all copyright conditions at the above URL.

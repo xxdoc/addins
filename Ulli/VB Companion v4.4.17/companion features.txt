@@ -1,0 +1,12 @@
+Features: 
+
+- configurable mouse wheel support independent of mouse driver 
+- word autocomplete while you type 
+- autotcomplete for API prototypes, constants and structures 
+- code pane grid at tabstops to facilitate indenting 
+- open all code panes by one mouseclick 
+- function to compare current with previous code 
+- copy facility to paste selected code from other projects 
+- pasteable list of members currently in scope (forms, data and procedures) 
+- easy multiline literal generation and modification 
+- reset function to cancel all alterations in a module without restarting VB.
