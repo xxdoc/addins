@@ -89,19 +89,19 @@ Private Sub AddinInstance_OnDisconnection(ByVal RemoveMode As AddInDesignerObjec
 '        If Not MenuHandler  Is Nothing Then Set MenuHandler = Nothing
 '    End If
     
-    If Not mcbMenuCommandBar2 Is Nothing Then
-        mcbMenuCommandBar2.Delete
-        Set mcbMenuCommandBar2 = Nothing
-        If Not MenuHandler2 Is Nothing Then Set MenuHandler2 = Nothing
+1    If Not mcbMenuCommandBar2 Is Nothing Then
+2        mcbMenuCommandBar2.Delete
+3        Set mcbMenuCommandBar2 = Nothing
+4        If Not MenuHandler2 Is Nothing Then Set MenuHandler2 = Nothing
     End If
 
-    If Not ComponentHandler Is Nothing Then Set ComponentHandler = Nothing
-    If Not mToolCodeView Is Nothing Then Set mToolCodeView = Nothing
-    If Not g_VBInstance Is Nothing Then Set g_VBInstance = Nothing
-    If Not wToolCodeView Is Nothing Then Set wToolCodeView = Nothing
+5    If Not ComponentHandler Is Nothing Then Set ComponentHandler = Nothing
+6    If Not mToolCodeView Is Nothing Then Set mToolCodeView = Nothing
+7    If Not g_VBInstance Is Nothing Then Set g_VBInstance = Nothing
+8    If Not wToolCodeView Is Nothing Then Set wToolCodeView = Nothing
     
-    For Each f In Forms
-        Unload f
+9    For Each f In Forms
+10        Unload f
     Next
     
     Exit Sub

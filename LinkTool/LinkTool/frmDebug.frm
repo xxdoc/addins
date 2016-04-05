@@ -87,6 +87,7 @@ Begin VB.Form frmDebug
          End
          Begin VB.CommandButton cmdContinue 
             Caption         =   "Continue"
+            Default         =   -1  'True
             Height          =   330
             Left            =   2070
             TabIndex        =   7
@@ -128,6 +129,7 @@ Begin VB.Form frmDebug
       _ExtentX        =   18918
       _ExtentY        =   9313
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   3
       TextRTF         =   $"frmDebug.frx":0000
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
@@ -149,6 +151,7 @@ Begin VB.Form frmDebug
       _ExtentX        =   18918
       _ExtentY        =   8202
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   3
       TextRTF         =   $"frmDebug.frx":007C
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 

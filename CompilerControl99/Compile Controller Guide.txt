@@ -1,0 +1,740 @@
+Compile Controller Guide
+10 August 1999
+by John Chamberlain
+email:	jchamber@lynx.dac.neu.edu
+web:	johnc.ne.mediaone.net
+
+
+Introduction
+This is a guide to using the Compile Controller VB add-in described in my November 1999 Visual Basic Programmer's Journal article. By using this guide with the accompanying binaries and source code you should be able to repeat the examples from the article. I strongly recommend working through the step-by-steps and reading them very carefully until you really understand what is going on. Once you understand how the controller works you will find it easy to use, but if you skip ahead you may experience frustration. It goes without saying that this is a sophisticated tool that is appropriate only for advanced programmers. When you use it you leave the world of the help file behind and enter into uncharted territory. The challenges and risks of forging into this wilderness are substantial, but the potential reward is well worth it: nearly total control over your VB executable. 
+
+Package Contents
+Below is a summary of what you need and what is included in the online package. The add-in should also work with VB5 and what other environments you may use for assembling and for other languages are purely up to you, but I can only recommend what I have tested.
+				
+	What You Need:	-	Visual Basic 6
+		-	Visual Studio 6 or at least Visual C++ 6 recommended
+		-	ML.EXE (microsoft assembler 6.11d)
+
+	Package Includes:	-	Compile Controller Guide.doc (this document)
+		-	Compile Controller project source code:
+				CompileController.vbp	
+				ControlPanel.frm/frx
+				CC.ico
+				AddIn.bas
+				Compile.bas
+				Connect.cls
+				MenuHandler.cls
+		-	Compiler Controller DLL version 1.0.116:  CompileController.dll
+		-	Compile Controller installer exe and source code
+		-	Test project VB source code (MDINote)
+		-	Test project C source code (FastString)
+		-	Test project C object module
+		-	Test project assembly source code
+		-	Test project assembly object module
+		-	Test project EXE build
+
+Getting and Using ML
+Microsoft includes an assembler called ML.EXE in its Win98 DDK available for download at http://www.microsoft.com/ddk/ddk98.htm. Theoretically you can buy MASM from Microsoft but I could not find out how to buy it. You might have to have wax one of Bill's cars or something before they sell it to you. Microsoft seems to be adopting the same position toward assembly that the government has towards uranium.
+
+You won't get far with the Compile Controller unless you have a working knowledge of assemblers and assembly language. If the last program you assembled was on punched cards now would be a good time to brush up on your skills. I found the printed(!) MASM 6.1 manuals invaluable for this purpose. You will also absolutely need a programmer's reference manual on the x86 instruction set. To get this call (800) 548-4725 (the Intel literature distribution center). The best book on x86 assembly in print that is easily available is Master Class Assembly Language, but this book is in no way a substitute for the MASM manuals. Check out the assembly language newsgroups and their FAQs for more information. Also, note that the Microsoft knowledge base has a number of useful articles on mixed language development that are relevant.
+
+Using this Guide
+This guide is organized into five separate subject areas structured somewhat like lessons. Each has various discussions of important issues relevant to that topic and step-by-step instructions on completing the core task. Each one should fit within a single session of two to four hours. If you find yourself taking longer than this you may need to further develop your basic skills. Keep in mind that this kind of programming often requires digging for information. I have tried to bring together the most important information, but inevitably you will need to search for information particular to your own application needs.
+
+Summary of the Tasks
+Task 1:	Get Acquainted with the Compile Controller ("CC")
+Goals: 	1	compile the CC add-in
+	2	install the add-in
+	3	open the test project and load/unload the add-in
+	4	hook/unhook VB's compilation
+	5	step through a compile with CC
+	6	test all the main features of CC
+	7	generate and examine a compiler listing
+
+Task 2:	Use the CC to Link a C Object Module in the MDINote Test Project
+Goals:	1 generate a listing for the VB stub
+	2 compile the C source code into a VB-compatible object module and listing
+	3 ensure the listing is VB-compatible; edit and re-assemble listing, if necessary
+	4 link in the C object module using file overwrite
+	5 link in the C object module using file rename (alternative technique)
+	6 run the test project
+	7 look at what is happening at the binary level
+
+Task 3:	Use the CC to Add In-Line Assembly to a VB Module
+Goals:	1 pause a compile and work with a listing
+	2 edit the assembly listing with new code
+	3 assemble the customized listing
+	4 substitute the customized object module for the VB-generated object module
+	5 resume the compile
+	6 run the customized executable
+
+Task 4:	Create a Normal DLL
+Goals:	1	Open the Normal DLL project and the Use DLL project
+	2	Generate a listing for MyExports in NormalDLL and go to linking
+	3	Make a DEF file for MyExports
+	4	Link NormalDLL using the DEF file and verify that it is exporting
+	5	Compile the Use DLL project and test NormalDLL.dll with it
+
+Task 5: Use HookDLLCall
+Goals:	1 analyze the core function of the Compile Controller: HookDLLCall
+	2	start a new project from scratch and use HookDLLCall to hook an API call of your choice
+
+
+
+
+Task 1:	Get Acquainted with the Compile Controller ("CC")
+Goals: 	1	compile the CC add-in
+	2	install the add-in
+	3	open the test project and load/unload the add-in
+	4	hook/unhook VB's compilation
+	5	step through a compile with CC
+	6	test all the main features of CC
+	7	generate and examine a compiler listing
+
+Discussion:
+General Description of the Compile Controller. The compile controller is a VB add-in that uses the IDE extensibility model of VB5 and VB6. It allows the developer to hook VB's use of the key kernel call CreateProcess and intercept VB's commands to its compiler and linker. The add-in provides a convenient interface for moderating the compilation process and modifying the commands to the compiler and linker.
+
+Configuration of the Project. Like all add-ins that use the current extensibility model, CC is an ActiveX DLL. It is single-threaded. The DLL is based at 0x1700. The project has the following dependencies:
+
+	MSVBVM60.DLL	standard language and runtime support
+	VB6EXT.OLB	Microsoft Visual Basic 6.0 Extensibility	required for add-ins
+	MSO97.DLL	Microsoft Office 8.0 Object Library	required for menu use
+
+The Structure of the Add-In. The add-in is constructed to be a general template and fully implements the extensibility interfaces. In cases where this application does not require an element of the interface a stub and comment are present. Below is a summary of the five modules in the project and their use.
+
+	Module Name	File	Usage Type	Purpose
+	clsConnect	Connect.cls	Add-In support	IDE extensibility
+	clsMenuHandler	MenuHandler.cls	Add-In & App support	Manage IDE menus
+	modAddIn	AddIn.bas	Add-In & App support	(various)
+	frmControlPanel	ControlPanel.frm	app-specific form	User's control panel
+	modCompile	Compile.bas	app-specific code	Hook management
+
+The first three modules are essential parts of the add-in template with application-specific code in the menu handler and the basic module. The last two modules are purely application specific. The basic module, modAddIn, maintains the public reference to the extensibility connection. This module is sort of the switchboard of the add-in template. For example, if the add-in had other forms their activation code would belong here. It is also the location for any initialization or termination logic (of which there is little in this particular application).
+
+When the add-in is loaded the menu handler is instructed to SetupMenus. It adds a single menu choice ("Hook Compilation") to the VB File menu. Thereafter, the clsMenuHandler responds to CommandBarEvents via the MenuHandler_Click event. When the click event for "Hook Compilation" (or "Unhook Compilation") occurs application-specific code is called.
+
+Do Not Use the Add-In Wizard. The step-by-step run through has you load the add-in with the VB IDE add-in manager and I strongly recommend using this method to load and unload all add-ins, including the compile controller. Visual Basic comes with an "Add-In Wizard" that can load add-ins, but this wizard has a crude design which ignores whether an add-in is loaded already or not (unlike the add-in manager). Since virtually all add-ins are intended to be loaded only once and there is no standard way for an add-in itself to prevent its own load, using the wizard is just asking for trouble because it makes it easy to multiple-load an add-in. I have tried to provide some protection against this in the compile controller, but it is still possible to mess it up.  Bottom line: don't use the add-in wizard.
+
+What is Hooking Compilation? To compile VB applications into an executable the VB application module (VBA6.DLL) makes calls to kernel32.dll's CreateProcessA function. It uses this function to run the compiler (C2.EXE) and the linker (LINK.EXE) which both run as standalone console applications. To make this call it obtains the address of CreateProcessA from its Import Address Table, a standard part of the memory space of modules operating under Windows. Hooking the call means that the address in this table is changed so that it refers instead to a function of our own making. Our function can then do any extra processing desired before calling CreateProcessA itself. When CreateProcessA returns a value to our function it passes that return value back to VBA6.DLL. Because the function essentially filters the call to CreateProcessA it is called "CreateProcessFilter".
+
+What is CreateProcessA? CreateProcessA is the call used to create a process "kernel object" under Win32. There are twelve types of kernel objects including things such as pipes, files, threads and processes. A good discussion of kernel objects and CreateProcess can be found in the book "Advanced Windows" by Jeffrey Richter.
+
+How CC Works. When the developer clicks "Hook/Unhook Compilation" the menu handler calls ToggleCreateProcessHook located in modCompile. The purpose of this function is to determine whether CreateProcess is currently hooked or not and if it is unhooked, hook it by calling HookCreateProcess, and if it is hooked, unhook it by calling UnhookCreateProcess. Both of these functions call HookDLLCall to do the actual work of hooking and unhooking. HookDLLCall is a generic function that can hook any DLL import. A detailed discussion of HookDLLCall takes place in the last task of this guide.
+
+What Happens in a Hooked Compilation? Once CreateProcessA is hooked the add-in function CreateProcessFilter will be called anytime VBA6 attempts to call CreateProcessA. Because, to my knowledge, it uses this call only for compiling CreateProcessFilter will be called when and only when a developer has asked VB to compile a project. CreateProcessFilter maintains two statics, bCheckModuleList and sInterceptMode, that determine what its action should be. Here is a summary of these states and corresponding actions:
+
+	bCheckModuleList = True	if any of the files in the module list are in the command line to CreateProcess, activate the control panel, otherwise continue compiling
+	bCheckModuleList = False
+		sInterceptMode = "" or "Next Module"	activate the control panel
+		sInterceptMode = "Skip to Link"	if the command line begins with "LINK" activate the control panel, otherwise continue compiling
+		sInterceptMode = "Finish Compile"	continue compiling
+
+When the control panel is "activated" it means that it is shown if not already active and the text boxes on it are updated to reflect the current parameters of the call to CreateProcess. CreateProcessFilter waits until the call to ActivateControlPanel returns, which only happens when the developer has made some action. When CreateProcessFilter continues it uses the text from the controls on the control panel as input to CreateProcess, thus the developer can change these parameters.
+
+The Control Panel is Modal. Once the panel is created it is always present (although it may be hidden). During pauses in compilation it becomes visible. Because it is modal other actions can not be done while it remains visible. This is important because VB in not in a valid state to receive user input during compilation and a crash could occur if the IDE was accessible. The compile controller works because when it executes as a compiled dll it relies on the virtual machine (MSVBVM) for its functionality and is thus largely independent of the VBA module. It follows from this that if you were to modify CC you should not have it do anything that would cause interaction with VBA.
+
+Restart VB If You Get Stuck. If you stress the add-in or get into a funny state by generating compiler errors or other means you may get stuck. When this happens typically what happens is that when you do a Make there is no interception. Just restart VB and get a fresh environment. 
+
+
+*** Task 1 Run Through ***
+
+Goal: 	1	compile the CC add-in
+Start VB6 and open the CompileController project. Verify that all files are present as described in the discussion above on the structure of the add-in. Compile the add-in with a different name, such as CompileController2.dll, so as not to overwrite the standard binary. Delete the binary you just created.
+
+Goal:	2	install the add-in
+Register Add-In: Open Project\References and Browse to add a reference to the CompileController.dll. This will register the add-in. Click Cancel to exit Project\References (you should not actually set a reference to the dll). Examine modCompile. It has a procedure called AddToINI. Execute this procedure from the immediate window. This will install the add-in. Go to Add-Ins\Add-In Manager. "Compile Controller" should now appear in the list of available add-ins.
+
+Goal:	3	open the MDINote test project and load/unload the add-in
+Open the MDINote test project. If VB prompts you save changes to the CompileController project click No. Go to Add-Ins\Add-In Manager. Double-click "Compile Controller" or check the Loaded check box below. The add-in list should change the CC's status to "Loaded". Double-click or uncheck to unload CC.
+
+Goal:	4	hook/unhook VB's compilation
+Load CC. Go to the File menu. After the Make ... menu entry there should be an additional menu item "Hook Compilation". Click it. A message box should appear announcing "Compiler has been hooked." Click 'OK'. Go to the File menu. The new menu choice will have toggled to "Unhook Compilation". Click it. A message box should appear announcing "Compiler has been unhooked. This is how you activate/deactivate the controller.
+
+Goal:	5	step through a compile with CC
+Choose Run\Start With Full Compile to verify that the test project compiles. Click Run\End to stop execution of the test project. Choose File\Hook Compilation. Choose File\Make ... to begin a compile. When the Make Project dialog appears change the name of the exe so as not to overwrite the standard exe. Click 'OK'. The compile options should specify native code (P-code generation will not be intercepted.  The status bar in the VB IDE should change to "Compiling ..." and the CC control panel will appear. Click the "Next Module" button on the control panel. The status progress bar in the menu will advance and the text boxes in the control panel will change to reflect the module that is being compiled. Continue to click "Next Module". Eventually the application text box will change from ...C2.EXE to ...LINK.EXE. When you click "Next Module" again the control panel will vanish. Compilation is complete. Verify that the newly-created executable is present in the directory chosen.
+
+Goal:	6	test all the main features of CC
+Make the project again except this time click "Finish Compile" from the control panel. The project will complete compilation with no further interruption. Make the project again except this time click "Skip to Linking". Compilation will proceed without interruption until the link step when it will pause. Click "Finish Compile" or "Next Module" to complete the compile. Make the project again except this time check "Select Modules to Intercept" and check one of the modules in the list. Click "Next Module". Compilation will pause at the module you have selected. Click "Select All" and "Select None" to see their behavior. While the compilation is still paused at the selected module check the "Generate Listing" box. Notice that the command line changes. Check this box on and off and notice how the command line is alternately restored and modified. Now, go directly to step 7 ...
+
+Goal:	7	generate and examine a compiler listing
+Make sure the "Generate Listing" box is checked. Click "Next Module". Go to the Windows Explorer and look in the test project directory. The module you just compiled should have a .LST file present in the directory. Open the .LST file in a text editor such as Notepad or Wordpad. This is the assembly listing for the module that was compiled. Go back to the control panel and finish compilation. Delete the listing and any binaries you just created.
+
+Task 1 is complete. You are acquainted with the Compile Controller.
+
+Task 2:	Use the CC to Link a C Object Module in the Test Project
+Goals:	1	generate a listing for the VB stub
+	2	compile the C source code into a VB-compatible object module and listing
+	3	ensure the listing is VB-compatible; edit and re-assemble listing, if necessary
+	4	link in the C object module using file overwrite
+	5	link in the C object module using file rename (alternative technique)
+	6	run the test project
+Discussion:
+
+The Sample Project is MDInote: The sample project used for the minimal test case is MDInote which comes with VB5 and VB6. Use the version provided in the package because it has the stub you need in it and changes to the user interface to exercise the stub. Also, the project settings have been changed so that it generates native code rather than p-code (see the funny story below). MDInote is convenient because it is an app with a normal feeling and enough modules that you can use the full powers of CC. It also has a nice interactive interface that we can glom things onto.
+
+What is Happening: What we are trying to do is generate our own code from someplace else (here VC++) and insert it into the MDInote exe that we compile.  When we work with MDInote in the VB environment we use a stub module that has the same interface, i.e., calling protocol, as the alien function we plan on using.  This allows VB to compile. When VB compiles other modules in the project it creates a different object module for each one. If these object modules use functionality in the stub there will be import symbol inside the caller which corresponds to an export symbol inside the stub. When we substitute our VC++ generated object module it will work as long as the alien object module has the same symbol. All the linker really cares about is that the symbols match up.
+
+The Name Decoration Problem: The symbols generally used in object modules are variations of the variable names the programmer originally used. The compiler modifies the variable name actually put in the object module for various reasons, primarily to handle overloaded variables. This modified name is called the "decorated" name. Unfortunately, every compiler uses its own name decoration scheme which can change from version to version. What this means is that if you compile one module on a Microsoft compiler and another on a Borland compiler they might not link, even if they were written in the same language. This is exactly the problem we face here: name decoration used by VB's second pass compiler, C2, does not match name decoration used by the VC++ compiler. In the run through you will see the difference:
+	VB5/6 C2:	?FastBStringReverse@modFastString_stub@@AAGXXZ
+	VC++ CL:	?FastBStrReverse@@YGXPAF@Z
+
+There are various approaches to solving this problem and eventually you may want to look at special tools like browser toolkits, but for now it is best to learn the fundamental solution to this problem that always works: generate an assembly listing, modify it, and re-assemble.
+
+A Funny P-Code Story: When I was preparing the sample project out of MDInote and started to do the compile, CC began acting strangely, always compiling without interruption or skipping to the link. It was not breaking on the modules. I could hardly believe it. I started re-writing code and using debug statements, everything seemed right. I went low-level, stepping through every memory set in the virtual machine. CreateProcessA was just not happening. Then it dawned on me: MDInote was configured to generate p-code in which case VB generates the object files itself and only uses CreateProcessA to call the linker. Moral of the story: check your project settings.
+
+Yes, You Can Bomb: An interesting "feature" of this string reversal function is that it assumes that the string it is operating on is valid and allocated, a typical assumption of a C program. Although it would have been easy to do a validity check, I left it as a raw function to illustrate the obvious: the module is written in C not Basic. So if you pass it a variable that has not been initialized you will crash your VB program (or C program depending on how you want to look at it). 
+
+*** Task 2 Run Through ***
+
+Goal:	1	generate a listing for the VB stub
+Open the MDINote project as provided in the evaluation package in VB6. This project has been modified from the original sample so you should use it. Load CC and hook compilation. Choose File Make ... to start a compile. CC will appear. If the command line does not show modFastString_stub as the module being compiled check the "Select Modules to Intercept" check box and check modFastString_stub in the list and then click Next Module. You will intercept the compilation of the stub. When CC comes up with the stub interception check the "Generate Listing" check box and click "Finish Compile". Go to the directory where you have MDINote. There should be a file called "FastString.lst". This is the assembly listing for the stub. We need to get the VB decorated name for the function we want to link. Compare your listing to mine which is in an appendix at the end of this document.
+
+Goal:	2	compile the C source code into a VB-compatible object module and listing
+Start VC++ 6. Select File\New and create a new Win32 static library. Add FastString.cpp to it from the \FastString directory. From project settings change the calling convention to standard call (stdcall) and in the listing files section tell it you want an assembly listing with source code. A VC++ project file is provided if you do not want to build the project from scratch. Build the library. This will generate an .asm assembly listing. You can see mine in the \FastString\Debug directory. It is also included as an appendix to this guide.
+
+Goal:	3	ensure the listing is VB-compatible; edit and re-assemble listing
+Compare the VC++ listing to the VB listing. You will see the name of the function is different. Modify your VC++ listing so that it has the same name for the function as the VB listing. In an appendix to this document you can see the changes I made to my listing which are in bold. There are only two places that need to be changed (although I changed one of the comments too). Now you need to re-assemble this listing using ML.EXE which is included in the package. Make sure ML is in your path say by putting in your windows directory. Start a DOS prompt and go to the directory where you have the modified VC++ listing. Enter the following command to compile a new, VB-compatible object module:
+
+C:> ml /c /Cp /coff /Zm FastString.asm
+
+You should get no assembler errors or warnings. Now you ready to link this in with your VB project.
+
+Goal:	4	link in the C object module using file overwrite
+Do a new compile of MDINote and skip to the link. Notice that in the command line one of the files it is ready to link in is "FastString.obj". This is the object module that C2 made out of the stub in the project. Using the windows explorer or other method copy the FastString.obj that you made in step and overwrite the one in the MDINote directory. Click finish compile. If your edits to the symbols match it will finish the compile silently. If you made a mistake the linker will generate an error complaining about an unresolved external symbol.
+
+Goal:	5	link in the C object module using file rename (alternative technique)
+Now let's try a different method for linking in the C object module, one that I prefer. Reassemble the VC++ asm file and tell the assembler to output it to the name "FastString.obc". Now you can tell which object module comes from C. Copy this file to your MDINote directory. You do not need to overwrite the VB object module. Do a new compile of MDINote, stopping at the link. Edit the command line by changing "FastString.obj" to "FastString.obc". Now the linker will link in your C++ module instead of the VB module.
+
+Goal:	6	run the test project
+Run the MDINote.EXE executable you just created. I have included my own compile with the name jsc_MDINote.EXE for comparison. Type some text in the MDI window. The new "Tools\Reverse Comparison" menu choice allows you to compare performance of the statically linked version versus the virtual machine call StrReverse versus a function written in Basic.  You can see that my C has very similar performance to the virtual machine function even though it is poorly written. If desired we could tune the assembly listing for FastBStrReverse and probably execute several times faster than the virtual machine call.
+
+Task 3:	Use the CC to Add In-Line Assembly to a VB Module
+Goals:	1	pause a compile of a basic module and work with its listing
+	2	edit the listing by replacing C2 assembly with your own assembly
+	3	assemble the customized listing
+	4	substitute the customized object module for the VB-generated object module
+	5	resume the compile
+	6	run the customized executable
+Discussion:
+
+The Sample Project is InLineAssemblyExample:  The example is a very simple project that allows you to enter a number to be divided by two and the number of times (iterations) to the division. There are two buttons on the form which correspond to two identical division functions in the project. If the project is compiled normally the two buttons have the same result. For example, on my machine it takes about .22 seconds to divide a number by two a million times with either button (the routines are the same). After we edit one of the routines at the assembly level we find that it runs in about .022 seconds, 10 times faster.
+
+What is the Use of this Optimization?:  If you were implementing a binary search tree the rounding code that C2 builds into the division is wasted and, in fact, you might have to write additional logic to un-round the result making it even slower.
+
+Compilus Interruptus: In the run through we stop at linking, go re-assemble the module with our modifications, then finish the compile. I think of this mode of operation as "compilus interruptus" because you just stop right in the middle of the compile. In this particular example it is not really necessary because there are no dynamic variables in the module, but in many situations where you are adding in-line assembly there will be dynamic variables which means you have to edit and re-assemble the listing from the same compile--you cannot use an object module from an old compile in a new one, even if the code has not changed because the dynamic variables will still change.
+
+Breaking Out Unnamed Variables: The assembly listings which C2 generates are not really complete because they do not distinguish between compiler-created locals if there is more than one of them. My guess is that the internal locals are kept in a separate data structure from the one the compiler uses to generate the listing. This means that you have to manually break out these variables.  For example, 
+
+if your function has this before it:		you have to change it to this:
+
+_unnamed_var1$ = -32	=>	_unnamed_var1$ = -32
+_unnamed_var1$ = -36	=>	_unnamed_var2$ = -36
+_unnamed_var1$ = -52	=>	_unnamed_var3$ = -52
+_unnamed_var1$ = -68	=>	_unnamed_var4$ = -68
+_unnamed_var1$ = -84	=>	_unnamed_var5$ = -84
+
+Then you have to go through the function and change the 1s in code to whatever number (1 to 5) is the variable in question. This is easier than it sounds and if you can't do it, it means you probably don't understand the function well enough to modify it's assembly anyway.
+
+In the run through for this task there are only two unnamed variables. One is used to hold the number of iterations and the other is used to hold the value of 1 by which the loop is incremented. If you look in the listing you can see that the compiler sets these locals up right at the beginning:
+
+	mov	eax, DWORD PTR _lngIterations$[ebp]		<= lngIterations arg is
+	mov	eax, DWORD PTR [eax]				<= dereferenced and
+	mov	DWORD PTR _unnamed_var1$[ebp], eax		<= stuffed in var1
+	mov	DWORD PTR _unnamed_var1$[ebp], 1		<= value 1 stuffed in 2
+
+If you examine my .asm file you can see how I changed the name of the second one (which holds the '1') to _unnamed_var2$. Breaking out the unnamed variables basically requires that you figure where each compiler-generated local is used.
+
+How to Cheat to Do the Breakout:  Okay, now that I have terrified you into thinking you might have to actually understand the code in your project, there is actually an easy way to cheat and do the breakout without understanding which variable is which. Do a normal, unmodified compile with symbolic debugging on and add a DebugBreak call before the function (see the article if you do not know how to do this). Set your debugging view to include code bytes. When you step into the function the display will be something like this:
+
+6:            DivideBy2Normally = lngDividend / 2
+00402347 8B 45 FC             mov         eax,dword ptr [xIterations]
+0040234A 03 45 F4             add         eax,dword ptr [unnamed_var1]
+0040234D 70 54                jo          Math::DivideBy2Normally+7Fh (004023a3)
+0040234F 89 45 FC             mov         dword ptr [xIterations],eax
+00402352 8B 45 FC             mov         eax,dword ptr [xIterations]
+00402355 3B 45 F0             cmp         eax,dword ptr [unnamed_var1]
+
+This is an actual excerpt from the task example. As you can see the unnamed compiler variables show up just as in the listing, but look at the code bytes. The last 1 or 2 code bytes in the instruction are the addressing information. This makes it easy to tell the variables apart. In the case of the example, the iterations are "F0" and the looping increment is "F4". I just copy the window to a document and print it for easy reference. Another way to get the code bytes is to have them included in the listing. When you generate the listing for a module specify the switch as "-FAcs" and the code bytes will be included. This is faster than cribbing them out of the debugger but the debugger is the ultimate authority because it shows what is actually in memory at run time.
+
+Comparing Code Bytes:  Although I have not encountered cases in which a listing compiled differently than its object module (other than the problem with unnamed compiler variables), there is always the possibility that this can happen. If this does happen you will need to use the technique above to compare the code bytes from the VB/C2-generated object module to those from your assembled module to ascertain what is different and why.
+
+Assembly Optimization Is Real:  As you will see in the run through the optimization we do results in a 10X increase in speed. We could make it even faster by optimizing the loop with a LOOP instruction and making other changes. You may read claims that compilers "nowadays" are so efficient that humans cannot outcode them. This is sheer nonsense. Even a beginner like me can easily outcode a compiler. Experienced pros can blast a compiler out of the water in both speed and in size of code.
+
+Future Features:  By now you should realize that there are a number of ways to improve the Compile Controller. For example, by handling dynamic variables and integrating an assembler you could make the system fully automatic so that no manual intervention would be necessary--it would just automatically compile and link everything correctly. You could also have it automatically handle unnamed variables. After working with the add-in for a while you can test your understanding by designing a controller that would work in a fully automated way.
+
+
+*** Task 3 Run Through ***
+
+Goal:	1	pause a compile of a basic module and work with its listing
+Open the InLineAssembly project as provided in the evaluation package in VB6. Read it so you can see what it does. We will be altering the DivideBy2ByShifting module at the assembly level. Hook compilation, generate a listing for the Math.bas module, and skip to linking. Now, open the listing in an editor. I just used notepad, but you may have your own  favorite editor. If you are all set up as an assembly-language programmer, you may even have a special assembly editor/assembler you can use. Note that we are working with the listing while the VB environment is frozen at the link step by the Compile Controller.
+
+Goal:	2	edit the listing by replacing C2 assembly with your own assembly
+Edit the listing by replacing the rounding code with mov/sar instruction pair as shown in my modified listing called "Math.asm". I have commented out the code being replaced. Break out the unnamed vars (see discussion). Do research to learn how the modification works. Why is the new MOV instruction necessary? Note that you could also replace C2's ADD/CMP sequence with a LOOP instruction and remove the stack check and overflow call to optimize the routine even further.
+ 
+Goal:	3	assemble the customized listing
+This step is similar to the one in the previous task. Go to the directory where your listing is and assemble it with the command:
+
+C:> ml /c /Cp /coff /Zm Math.asm
+
+My .asm and resulting .obj (object module) are included in the directory. There is nothing sacred about the .asm file extension. Frequently I use .lst to distinguish VB listings from C-generated listings. You should get no assembler errors or warnings.
+
+Goal:	4	substitute the customized object module for the VB-generated object module
+Since the default name for the object file is Math.obj executing the command in Goal 3 overwrites the Math.obj that C2 already generated with our customized object module, but this is exactly what we want so we need to do nothing more. If you had assembled to a differently-named file you would have to somehow substitute your new module for the one VB is ready to link, either by changing the linker command itself or renaming the file manually.
+
+Goal:	5	resume the compile
+All this time VB has been sitting ready to link. Now we can go back and finish the job. Notice that the linker command has a reference to "Math.OBJ". It thinks it is linking the object module that it told C2 to create, but in fact it will be linking the module we assembled.
+
+Goal:	6	run the customized executable
+When you run the finished executable it will announce execution times for both normal and modified division by 2.
+ 
+
+Task 4:	Create a Normal DLL
+Goals:	1	Open the Normal DLL project and the Use DLL project
+	2	Generate a listing for MyExports in NormalDLL and go to linking
+	3	Make a DEF file for MyExports
+	4	Link NormalDLL using the DEF file and verify that it is exporting
+	5	Compile the Use DLL project and test NormalDLL.dll with it
+Discussion:
+
+There are Two Projects in This Example.  The example has two projects, one to create a normal DLL and the other to test it. In this case the test project is in VB, but for most people who need a normal DLL the caller will be in some other environment. For example, one recent poster to the VB general discussion newsgroup on the Microsoft server wanted to create a normal DLL so that it could be called from PowerBuilder. I have chosen this kind of core task to illustrate the use of the linker because creating normal DLLs is one of the most frequently requested desires of VB programmers.
+
+Getting it Down to a Science. Like other activities using the compile controller there is a steep learning curve, but once you have it down to a science you will be able to create normal DLLs with no trouble. Part of the learning curve here is figuring out how DLLs work in the first place. You should review the MSDN library articles on DLLs so that you know the basics of how functions are exported and imported and what the role of a module definition is. Another aspect of DLLs is one that you may already be familiar with--argument conversions. Various standard resources such as Appleman's book on using the WinAPI from VB explain how calling conventions work and how to convert arguments leaving and entering a VB application. You will need to apply some of these lessons in reverse when making a normal DLL because now your app is the DLL and callers will be talking to it as though it is a C program or something.
+
+The ActiveX DLL Project Setting. In this exercise I have set up the DLL project as an ActiveX DLL. The reason for this is to trick VB into configuring the project as a DLL. I have tried briefly to set the project up as an EXE but this was failing probably because a DLL's entry point function must return True after it loads (which you should already have learned by now!) and I suspect that the entry procedure that VB uses for an EXE does not return True. This can probably be corrected by adding an entry function to the project and altering the default entry point for the project, but I did not want to introduce this added complexity. The downside of making the project an ActiveX DLL is that we have to have a dummy class module in the project.
+
+What the Example Does. The example passes a user-entered number and string to the DLL which concatenates them and returns the resulting string.
+
+Debugging DLL Calls. The article briefly describes the value of stepping through a call in the debugger to analyze DLL calls. If you are developing a normal DLL with VB you will find this kind of debugging necessary and unavoidable. Once you get good at it you will find that you can rapidly get a perfect match up between the caller and callee.
+
+Pointer Manipulation. Just because you know how the arguments of a call are supposed to match up doesn't mean you are there, because sometimes you will need to manipulate variable pointers to make it happen. The example project illustrates two key techniques: converting a C-string and changing a VB variable's pointer. Once you understand how these techniques work you will be able to extrapolate them to other related translation tasks.
+ 
+
+*** Task 4 Run Through ***
+
+Goal: 	1	Open the Normal DLL project and the Use DLL project
+Open both DLL project and the UseDLL project that will test the DLL. Compare the declarations in each and review the kinds of conversions that are used. I feel that the conversions and declarations chosen are the cleanest way to handle longs and strings, but there are many alternatives and this model could conceivably be improved upon. If you have limited experience doing data type translations for DLL interaction you should spend extra time really understanding how the translations work and why they are necessary because if you try to implement a DLL without a strong understanding in this department you will just crash and crash and never get it right.
+
+Goal: 	2	Generate a listing for MyExports in NormalDLL and go to linking
+We will be exporting the function "NumberString". We need the listing to find out what the decorated name of this function is. Other than that all of the action in this task takes place at the linker's command line.
+
+Goal: 	3	Make a DEF file for MyExports
+Now that you know the decorated name for your exported function is you can make the module definition file. The one I created is in the directory, but you should review the documentation on these files and make your own.
+
+Goal: 	4	Link NormalDLL using the DEF file and verify that it is exporting
+At the linker command line you have to insert a switch telling it to use your .DEF file. I just copy the /OUT switch and edit it. The new switch should read something like this (depending on your directory structure):
+
+	/DEF:"c:\Compile Controller\Normal DLL\NormalDLL.DEF" 
+
+This tells the linker to use this definition file when it links and will result in the export of an functions specified as exports in the file. Once you have linked you should verify that your function is really getting exported. Go to a DOS prompt and change to the Normal DLL directory. If you have installed VC++ you should have DUMPBIN in your path. Execute the command:
+
+	dumpbin /exports normaldll.dll
+
+This will display the exports of the DLL. It should list the standard ActiveX exports (which will not be used) and "NumberString", our export. I have saved the result I got as the text file "ExportDump.txt" in the example directory.
+
+Goal: 	5	Compile the Use DLL project
+Compile the test project. This is a normal VB project and no special changes are required. When you run it and enter input such as 5 and "my string" it should announce the result as "5mystring" which is the concatenation done by the DLL. My binaries are included in the directory for comparison's sake.
+
+
+
+
+Task 5: Use HookDLLCall
+Goals: 	1	analyze the core function of the Compile Controller: HookDLLCall
+	2	start a new project from scratch and use HookDLLCall to hook an API call of your choice
+
+Discussion:
+
+The Magic: HookDLLCall. 95% of CC is ordinary old add-in and app code. What it can do, however, is very special because of this magical function that allows an application to intercept DLL calls in it own process space. In other words, if your work is a DLL or EXE in a process space that has many DLLs, your module can use this function to reach out and hook a DLL call made by any other module. Since CC, when loaded, exists in the process space of the VB development environment it can intercept any call in any module of that environment.
+
+The VB Process Space. Please refer to the appendix on the VB process space at the end of this document. The table in this appendix shows the typical VB6 process space in WinNT. There are 37 different loaded modules. In our case we are interested in the third module, VBA6.DLL, loaded at base 0x0FA9.
+
+Possible Uses for HookDLLCall. The functionality of this routine is so fundamental that it constitutes a general-purpose tool for windows development. It can be most useful in situations either where one is working with legacy code that needs to work in a new environment, but the source is unavailable or cannot be modified, or (as here) when your module exists in a pre-established environment which is either misbehaving or does not offer the functionality your module needs to operate. One obvious use is simply informational: tracing. You can trace any or all DLL calls in the environment. The implications for debugging are obvious. If your module's content is not completely controllable by you, you can even use the function to intercept your own module's DLL call. Here's an example: VB-generated COM objects delegate their standard interface to the virtual machine via the following DLL calls:
+	BASIC_CLASS_AddRef
+	BASIC_CLASS_GetIDsOfNames
+	BASIC_CLASS_Invoke
+	BASIC_CLASS_QueryInterface
+	BASIC_CLASS_Release
+	
+If you need to change the way your object responds to external COM queries you can use the function to intercept the delegation and handle it any way you want. For example, if you wanted to know every time something was adding a reference to your object, hook the AddRef delegation above.
+
+*** Task 5 Run Through ***
+
+Goal: 	1	analyze the core function of the Compile Controller: HookDLLCall
+The source code for CC has comments to this function that describe how it works. Because it is a fairly sophisticated routine this header should accompany the function if it is copied elsewhere. Now would be a good time to read the header and skim the function itself. The comment describes the IAT and how it is used. The comments in the function describe what it does at each step. It is important to notice the heavy amount of validation that is done. This is to minimize the chance of an incorrect memory write.
+
+Goal:	2	start a new project from scratch and use HookDLLCall to hook an API call of your choice
+
+To gain practical experience with the function I recommend starting a new project and using the function to hook an API call. You often have to translate parameters in some way (if you want to use them). For example, the CC filter function, CreateProcessFilter, has to translate the strings passed to CreateProcessA because it needs to use them, but the other arguments it can just pass along. Note that if you decide to hook a function that does not have a known prototype you will have to do some detective work to discover the function's calling convention and arguments which can be a fun challenge.
+
+Congratulations! You have finished the guide.
+
+
+Appendix:	VB's FastString Stub Listing
+
+	TITLE	C:\Online Package\MDINote\FastString.bas
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+$$SYMBOLS	SEGMENT BYTE USE32 'DEBSYM'
+$$SYMBOLS	ENDS
+$$TYPES	SEGMENT BYTE USE32 'DEBTYP'
+$$TYPES	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+text$1	SEGMENT PARA USE32 PUBLIC ''
+text$1	ENDS
+;	COMDAT ?FastBStringReverse@modFastString_stub@@AAGXXZ
+text$1	SEGMENT PARA USE32 PUBLIC ''
+text$1	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+PUBLIC	?FastBStringReverse@modFastString_stub@@AAGXXZ	; modFastString_stub::FastBStringReverse
+;	COMDAT ?FastBStringReverse@modFastString_stub@@AAGXXZ
+text$1	SEGMENT
+?FastBStringReverse@modFastString_stub@@AAGXXZ PROC NEAR ; modFastString_stub::FastBStringReverse, COMDAT
+
+; 4    : Sub FastBStringReverse(ByRef TargetString As String)
+
+	push	ebp
+	mov	ebp, esp
+
+; 5    :     'nothing happens in the stub
+; 6    : End Sub
+
+	pop	ebp
+	ret	4
+?FastBStringReverse@modFastString_stub@@AAGXXZ ENDP	; modFastString_stub::FastBStringReverse
+text$1	ENDS
+END
+
+Appendix:	The Real VC++ Source with Modifications
+
+	TITLE	C:\FastString\FastString.cpp
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+$$SYMBOLS	SEGMENT BYTE USE32 'DEBSYM'
+$$SYMBOLS	ENDS
+$$TYPES	SEGMENT BYTE USE32 'DEBTYP'
+$$TYPES	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+;	COMDAT ?FastBStrReverse@@YGXPAPAG@Z
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+PUBLIC	?FastBStringReverse@modFastString_stub@@AAGXXZ			; FastBStrReverse
+;	COMDAT ?FastBStrReverse@@YGXPAPAG@Z
+_TEXT	SEGMENT
+_BasicString$ = 8
+_posLeft$ = -4
+_posRight$ = -8
+_Swap$ = -12
+?FastBStringReverse@modFastString_stub@@AAGXXZ PROC NEAR			; FastBStrReverse, COMDAT
+
+; 5    : {
+
+	push	ebp
+	mov	ebp, esp
+	sub	esp, 76					; 0000004cH
+	push	ebx
+	push	esi
+	push	edi
+	lea	edi, DWORD PTR [ebp-76]
+	mov	ecx, 19					; 00000013H
+	mov	eax, -858993460				; ccccccccH
+	rep stosd
+
+; 6    : 	unsigned long posLeft, posRight;
+; 7    : 	unsigned short Swap;
+; 8    : 
+; 9    : 	for (posLeft = 0, posRight = (*BasicString)[-2]/2 - 1; posLeft < posRight; posLeft++, posRight--) {
+
+	mov	DWORD PTR _posLeft$[ebp], 0
+	mov	eax, DWORD PTR _BasicString$[ebp]
+	mov	ecx, DWORD PTR [eax]
+	xor	eax, eax
+	mov	ax, WORD PTR [ecx-4]
+	cdq
+	sub	eax, edx
+	sar	eax, 1
+	sub	eax, 1
+	mov	DWORD PTR _posRight$[ebp], eax
+	jmp	SHORT $L222
+$L223:
+	mov	edx, DWORD PTR _posLeft$[ebp]
+	add	edx, 1
+	mov	DWORD PTR _posLeft$[ebp], edx
+	mov	eax, DWORD PTR _posRight$[ebp]
+	sub	eax, 1
+	mov	DWORD PTR _posRight$[ebp], eax
+$L222:
+	mov	ecx, DWORD PTR _posLeft$[ebp]
+	cmp	ecx, DWORD PTR _posRight$[ebp]
+	jae	SHORT $L224
+
+; 10   : 		Swap = (*BasicString)[posLeft];
+
+	mov	edx, DWORD PTR _BasicString$[ebp]
+	mov	eax, DWORD PTR [edx]
+	mov	ecx, DWORD PTR _posLeft$[ebp]
+	mov	dx, WORD PTR [eax+ecx*2]
+	mov	WORD PTR _Swap$[ebp], dx
+
+; 11   : 		(*BasicString)[posLeft] = (*BasicString)[posRight];
+
+	mov	eax, DWORD PTR _BasicString$[ebp]
+	mov	ecx, DWORD PTR [eax]
+	mov	edx, DWORD PTR _BasicString$[ebp]
+	mov	eax, DWORD PTR [edx]
+	mov	edx, DWORD PTR _posLeft$[ebp]
+	mov	esi, DWORD PTR _posRight$[ebp]
+	mov	cx, WORD PTR [ecx+esi*2]
+	mov	WORD PTR [eax+edx*2], cx
+
+; 12   : 		(*BasicString)[posRight] = Swap;
+
+	mov	edx, DWORD PTR _BasicString$[ebp]
+	mov	eax, DWORD PTR [edx]
+	mov	ecx, DWORD PTR _posRight$[ebp]
+	mov	dx, WORD PTR _Swap$[ebp]
+	mov	WORD PTR [eax+ecx*2], dx
+
+; 13   : 
+; 14   : 	}
+
+	jmp	SHORT $L223
+$L224:
+
+; 15   : }
+
+	pop	edi
+	pop	esi
+	pop	ebx
+	mov	esp, ebp
+	pop	ebp
+	ret	4
+?FastBStringReverse@modFastString_stub@@AAGXXZ ENDP			; FastBStrReverse
+_TEXT	ENDS
+END
+
+
+
+Appendix:	The Typical Visual Basic 6 Process Space in NT
+
+
+
+
+Module
+Base
+End Address
+Module Size Ke 
+01 
+VB6.EXE
+0040 0000
+005C BFFF
+1,840
+02 
+VB6IDE.DLL
+0F6F 0000
+0F7F BFFF
+1,072
+03 
+VBA6.DLL
+0FA9 0000
+0FC3 2FFF
+1,676
+04 
+VCMMGR.DLL
+1000 0000
+101F 3FFF
+2,000
+05 
+COMDLG32.OCX
+217A 0000
+217C 2FFF
+140
+06 
+MSADDNDR.DLL
+24D9 0000
+24DA 4FFF
+84
+07 
+MSCOMCTL.OCX
+2758 0000
+2768 4FFF
+1,044
+08 
+DATAVIEW.DLL
+279E 0000
+27A6 7FFF
+544
+09 
+MSO97RT.DLL
+306C 0000
+30A4 9FFF
+3,624
+10 
+ADDSCCUS.DLL
+4812 0000
+4813 7FFF
+96
+11 
+COMMTB32.DLL
+5076 0000
+5077 1FFF
+72
+12 
+MFC42.DLL
+5F40 0000
+5F4F 1FFF
+968
+13 
+WINSPOOL.DRV
+5F60 0000
+5F61 7FFF
+96
+14 
+RPCLTC1.DLL
+5F81 0000
+5F81 6FFF
+28
+15 
+SSSCC.DLL
+6048 0000
+605E 8FFF
+1,444
+16 
+VBSCC.DLL
+6088 0000
+608C 2FFF
+268
+17 
+SSUS.DLL
+6317 0000
+631E AFFF
+492
+18 
+OLEAUT32.DLL
+6534 0000
+653D 1FFF
+584
+19 
+MSVBVM60.DLL
+6600 0000
+6615 7FFF
+1,376
+20 
+SHELL32.DLL
+7097 0000
+70B1 7FFF
+1,696
+21 
+COMCTL32.DLL
+7103 0000
+710A 2FFF
+460
+22 
+SHLWAPI.DLL
+710C 0000
+710E 2FFF
+140
+23 
+MPR.DLL
+7772 0000
+7773 0FFF
+68
+24 
+MSIDLE.DLL
+7778 0000
+7778 5FFF
+24
+25 
+SAMLIB.DLL
+777E 0000
+777E CFFF
+52
+26 
+NETAPI32.DLL
+7780 0000
+7783 9FFF
+232
+27 
+NETRAP.DLL
+7784 0000
+7784 8FFF
+36
+28 
+NTSHRUI.DLL
+77A4 0000
+77A4 BFFF
+48
+29 
+OLE32.DLL
+77B2 0000
+77BD 1FFF
+712
+30 
+COMDLG32.DLL
+77D8 0000
+77DB 1FFF
+200
+31 
+ADVAPI32.DLL
+77DC 0000
+77DF DFFF
+248
+32 
+RPCRT4.DLL
+77E1 0000
+77E6 1FFF
+328
+33 
+USER32.DLL
+77E7 0000
+77EC 3FFF
+336
+34 
+GDI32.DLL
+77ED 0000
+77EF BFFF
+176
+35 
+KERNEL32.DLL
+77F0 0000
+77F5 DFFF
+376
+36 
+NTDLL.DLL
+77F6 0000
+77FB BFFF
+368
+37 
+MSVCRT.DLL
+7800 0000
+7803 CFFF
+244
+
+

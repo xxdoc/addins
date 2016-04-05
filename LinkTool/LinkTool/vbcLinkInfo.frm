@@ -1,14 +1,11 @@
 VERSION 5.00
 Begin VB.Form frmLinkInfo 
-   BorderStyle     =   5  'Sizable ToolWindow
    Caption         =   "[MVBLC] Mathimagics VB Link Controller"
    ClientHeight    =   6150
    ClientLeft      =   60
-   ClientTop       =   345
+   ClientTop       =   390
    ClientWidth     =   5370
    LinkTopic       =   "Form1"
-   MaxButton       =   0   'False
-   MinButton       =   0   'False
    ScaleHeight     =   6150
    ScaleWidth      =   5370
    StartUpPosition =   2  'CenterScreen
@@ -54,6 +51,16 @@ Option Explicit
 ' This FORM is only used when displaying link error reports,
 ' or when showing the STATUS report.
 '===========================================================
+Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long)
+Private Const HWND_TOPMOST = -1
+
+
+Sub SetWindowTopMost(f As Form)
+   SetWindowPos f.hwnd, HWND_TOPMOST, f.Left / 15, _
+        f.Top / 15, f.Width / 15, _
+        f.Height / 15, Empty
+End Sub
+
 
 Sub ShowStatus(vbCommand As String)
    Dim j%, token$()
@@ -77,7 +84,7 @@ Sub ShowStatus(vbCommand As String)
    End Sub
 
 Sub ShowError(vbCommand As String)
-   Dim F%, j%, temp$, fLine$
+   Dim f%, j%, temp$, fLine$
    j = InStr(vbCommand, "/STATUS:")
    EXEFILE = Mid(vbCommand, j + 8)
    j = InStrRev(EXEFILE, "\")
@@ -90,11 +97,11 @@ Sub ShowError(vbCommand As String)
    List1.AddItem "An unexpected link error has occurred"
    List1.AddItem EXENAME & " link failed"
    List1.AddItem ""
-   F = FreeFile
+   f = FreeFile
    On Error GoTo BadSign
-   Open "c:\vbLink.log" For Input As #F
+   Open "c:\vbLink.log" For Input As #f
    Do
-      Line Input #F, fLine
+      Line Input #f, fLine
       j = InStr(fLine, "error")
       If j Then
          fLine = Mid$(fLine, j)
@@ -106,8 +113,8 @@ Sub ShowError(vbCommand As String)
             End If
          List1.AddItem "> " & fLine
          End If
-      Loop Until EOF(F)
-   Close #F
+      Loop Until EOF(f)
+   Close #f
    Exit Sub
 
 BadSign:
@@ -118,8 +125,17 @@ Private Sub Command1_Click()
     Unload Me
 End Sub
 
+Private Sub Form_Load()
+    FormPos Me, True
+    SetWindowTopMost Me
+End Sub
+
 Private Sub Form_Resize()
    On Error Resume Next
    Command1.Top = Me.Height - Command1.Height - 500
    List1.Move 0, 0, Me.ScaleWidth, Command1.Top - 200
+End Sub
+
+Private Sub Form_Unload(Cancel As Integer)
+    FormPos Me, True, True
 End Sub

@@ -1,0 +1,5 @@
+
+LIBRARY MyExports
+DESCRIPTION "Example of a normal DLL created in VB"
+EXPORTS
+	NumberString = ?NumberString@MyExports@@AAGXXZ

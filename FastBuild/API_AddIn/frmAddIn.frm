@@ -3,15 +3,12 @@ Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
 Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Begin VB.Form frmAddIn 
-   BorderStyle     =   5  'Sizable ToolWindow
    Caption         =   "API Add-In For Visual basic"
    ClientHeight    =   7920
    ClientLeft      =   2190
-   ClientTop       =   1905
+   ClientTop       =   1950
    ClientWidth     =   9930
    LinkTopic       =   "Form1"
-   MaxButton       =   0   'False
-   MinButton       =   0   'False
    ScaleHeight     =   7920
    ScaleWidth      =   9930
    StartUpPosition =   2  'CenterScreen
@@ -24,7 +21,6 @@ Begin VB.Form frmAddIn
       _ExtentX        =   16748
       _ExtentY        =   4683
       _Version        =   393217
-      Enabled         =   -1  'True
       ScrollBars      =   3
       RightMargin     =   50000
       TextRTF         =   $"frmAddIn.frx":0000

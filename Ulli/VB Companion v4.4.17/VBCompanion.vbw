@@ -1,9 +1,9 @@
 fSplash = 0, 0, 0, 0, C, 132, 132, 737, 665, C
 fSetOpts = 0, 0, 0, 0, C, 110, 110, 715, 643, C
 fSelect = 0, 0, 0, 0, C, 88, 88, 693, 621, C
-Fader = 0, 0, 0, 0, C, 0, 0, 0, 0, C
+Fader = 22, 22, 813, 696, C, 0, 0, 0, 0, C
 cMD5 = 22, 22, 627, 555, C
-mSubclass = 0, 0, 0, 0, C
+mSubclass = 44, 44, 649, 577, Z
 mReservedWords = 0, 0, 0, 0, C
 fCompare = 0, 0, 0, 0, C, 154, 154, 759, 687, C
 dCompanion = 0, 0, 0, 0, C, 0, 0, 0, 0, C

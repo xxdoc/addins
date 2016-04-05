@@ -123,7 +123,8 @@ End Sub
 'this method adds the Add-In to VB
 '------------------------------------------------------
 Private Sub AddinInstance_OnConnection(ByVal Application As Object, ByVal ConnectMode As AddInDesignerObjects.ext_ConnectMode, ByVal AddInInst As Object, custom() As Variant)
-    'On Error Resume Next
+    
+    On Error Resume Next
     
     'save the vb instance
     If VBInstance Is Nothing Then Set VBInstance = Application
@@ -521,29 +522,35 @@ End Sub
 'End Function
 
 Private Function AddButton(caption As String, resImg As Long) As Office.CommandBarControl
-    Dim cbMenu As Object
+    Dim cbMenu As CommandBarButton
     Dim orgData As String
+    Dim ipict As IPictureDisp
     
     On Error GoTo hell
     
-    If VBInstance.CommandBars.Count = 0 Then VBInstance.CommandBars.Add
+1    If VBInstance.CommandBars.Count = 0 Then VBInstance.CommandBars.Add
 
     'orgData = Clipboard.GetText
-    'Clipboard.Clear
+    Clipboard.Clear
     
-    VBInstance.CommandBars(1).Visible = True
-    Set cbMenu = VBInstance.CommandBars(1).Controls.Add(1) ', , , VBInstance.CommandBars(2).Controls.Count)
-    cbMenu.caption = caption
-    Clipboard.SetData LoadResPicture(resImg, 0)
-    cbMenu.PasteFace
-    Set AddButton = cbMenu
+2    VBInstance.CommandBars(1).Visible = True
+3    Set cbMenu = VBInstance.CommandBars(1).Controls.Add(1) ', , , VBInstance.CommandBars(2).Controls.Count)
+4    cbMenu.caption = caption
+5     Set ipict = LoadResPicture(resImg, 0)
+     If ipict Is Nothing Then
+6        MsgBox "Failed to load res picture: " & resImg
+     Else
+7       Clipboard.SetData ipict
+8       cbMenu.PasteFace
+     End If
+9    Set AddButton = cbMenu
     
     'Clipboard.Clear
     'If Len(orgData) > 0 Then Clipboard.SetText orgData
     
     Exit Function
 hell:
-    MsgBox "CodeView.AddButton: " & Err.Description
+    MsgBox "FastBuild.AddButton: " & caption & " Err: " & Err.Description & " line: " & Erl & " " & TypeName(cbMenu)
     
 End Function
 

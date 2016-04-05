@@ -1,0 +1,151 @@
+	TITLE	E:\Compile Controller\Online Package\Normal DLL\MyExports.bas
+	.386P
+include listing.inc
+if @Version gt 510
+.model FLAT
+else
+_TEXT	SEGMENT PARA USE32 PUBLIC 'CODE'
+_TEXT	ENDS
+_DATA	SEGMENT DWORD USE32 PUBLIC 'DATA'
+_DATA	ENDS
+CONST	SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST	ENDS
+_BSS	SEGMENT DWORD USE32 PUBLIC 'BSS'
+_BSS	ENDS
+$$SYMBOLS	SEGMENT BYTE USE32 'DEBSYM'
+$$SYMBOLS	ENDS
+$$TYPES	SEGMENT BYTE USE32 'DEBTYP'
+$$TYPES	ENDS
+_TLS	SEGMENT DWORD USE32 PUBLIC 'TLS'
+_TLS	ENDS
+text$1	SEGMENT PARA USE32 PUBLIC ''
+text$1	ENDS
+;	COMDAT ?Main@MyExports@@AAGXXZ
+text$1	SEGMENT PARA USE32 PUBLIC ''
+text$1	ENDS
+;	COMDAT ?NumberString@MyExports@@AAGXXZ
+text$1	SEGMENT PARA USE32 PUBLIC ''
+text$1	ENDS
+FLAT	GROUP _DATA, CONST, _BSS
+	ASSUME	CS: FLAT, DS: FLAT, SS: FLAT
+endif
+PUBLIC	?Main@MyExports@@AAGXXZ				; MyExports::Main
+;	COMDAT ?Main@MyExports@@AAGXXZ
+text$1	SEGMENT
+?Main@MyExports@@AAGXXZ PROC NEAR			; MyExports::Main, COMDAT
+
+; 3    : Public Sub Main()
+
+	push	ebp
+	mov	ebp, esp
+
+; 4    : End Sub
+
+	pop	ebp
+	ret	0
+?Main@MyExports@@AAGXXZ ENDP				; MyExports::Main
+text$1	ENDS
+PUBLIC	?NumberString@MyExports@@AAGXXZ			; MyExports::NumberString
+EXTRN	@__vbaVarDup:NEAR
+EXTRN	@__vbaStrMove:NEAR
+EXTRN	___vbaStrVarMove:NEAR
+EXTRN	___vbaVarCat:NEAR
+EXTRN	@__vbaFreeVar:NEAR
+EXTRN	@__vbaFreeStr:NEAR
+EXTRN	___vbaExceptHandler:NEAR
+EXTRN	__except_list:DWORD
+EXTRN	___vbaChkstk:NEAR
+;	COMDAT CONST
+; File E:\Compile Controller\Online Package\Normal DLL\MyExports.bas
+CONST	SEGMENT
+$S31	DB	0eH, 00H
+	DB	08H, 00H
+	DB	00H, 00H, 00H, 00H
+	DD	FLAT:$L29
+	DD	FLAT:$L30
+CONST	ENDS
+;	COMDAT ?NumberString@MyExports@@AAGXXZ
+text$1	SEGMENT
+_sAnyString$ = 12
+_lngAnyNumber$ = 8
+_NumberString$ = -24
+_sAnyString$ = -40
+_unnamed_var1$ = -56
+_unnamed_var1$ = -72
+__$SEHRec$ = -20
+?NumberString@MyExports@@AAGXXZ PROC NEAR		; MyExports::NumberString, COMDAT
+
+; 6    : Public Function NumberString(ByVal lngAnyNumber As Long, ByVal sAnyString) As String
+
+	push	ebp
+	mov	ebp, esp
+	sub	esp, 12					; 0000000cH
+	push	OFFSET FLAT:___vbaExceptHandler
+	mov	eax, DWORD PTR fs:__except_list
+	push	eax
+	mov	DWORD PTR fs:__except_list, esp
+	push	60					; 0000003cH
+	pop	eax
+	call	___vbaChkstk
+	push	ebx
+	push	esi
+	push	edi
+	mov	DWORD PTR __$SEHRec$[ebp+8], esp
+	mov	DWORD PTR __$SEHRec$[ebp+12], OFFSET FLAT:$S31
+	lea	edx, DWORD PTR _sAnyString$[ebp]
+	lea	ecx, DWORD PTR _sAnyString$[ebp]
+	call	@__vbaVarDup
+
+; 7    :     NumberString = lngAnyNumber & sAnyString
+
+	mov	eax, DWORD PTR _lngAnyNumber$[ebp]
+	mov	DWORD PTR _unnamed_var1$[ebp+8], eax
+	mov	DWORD PTR _unnamed_var1$[ebp], 3
+	lea	eax, DWORD PTR _unnamed_var1$[ebp]
+	push	eax
+	lea	eax, DWORD PTR _sAnyString$[ebp]
+	push	eax
+	lea	eax, DWORD PTR _unnamed_var1$[ebp]
+	push	eax
+	call	___vbaVarCat
+	push	eax
+	call	___vbaStrVarMove
+	mov	edx, eax
+	lea	ecx, DWORD PTR _NumberString$[ebp]
+	call	@__vbaStrMove
+	lea	ecx, DWORD PTR _unnamed_var1$[ebp]
+	call	@__vbaFreeVar
+
+; 8    : End Function
+
+	push	$L51
+	jmp	SHORT $L46
+$L30:
+	mov	eax, DWORD PTR __$SEHRec$[ebp+16]
+	and	eax, 4
+	test	eax, eax
+	je	SHORT $L37
+	lea	ecx, DWORD PTR _NumberString$[ebp]
+	call	@__vbaFreeStr
+$L37:
+	lea	ecx, DWORD PTR _unnamed_var1$[ebp]
+	call	@__vbaFreeVar
+	ret	0
+$L46:
+$L29:
+	lea	ecx, DWORD PTR _sAnyString$[ebp]
+	call	@__vbaFreeVar
+$L49:
+	ret	0
+$L51:
+	mov	eax, DWORD PTR _NumberString$[ebp]
+	mov	ecx, DWORD PTR __$SEHRec$[ebp]
+	mov	DWORD PTR fs:__except_list, ecx
+	pop	edi
+	pop	esi
+	pop	ebx
+	leave
+	ret	20					; 00000014H
+?NumberString@MyExports@@AAGXXZ ENDP			; MyExports::NumberString
+text$1	ENDS
+END

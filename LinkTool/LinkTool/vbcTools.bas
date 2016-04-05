@@ -362,3 +362,27 @@ Sub FixDLL()
 
 End Sub
 
+
+
+Sub FormPos(fform As Form, Optional andSize As Boolean = False, Optional save_mode As Boolean = False)
+    
+    On Error Resume Next
+    
+    Dim f, sz, i, ff, def
+    f = Split(",Left,Top,Height,Width", ",")
+    
+    If fform.WindowState = vbMinimized Then Exit Sub
+    If andSize = False Then sz = 2 Else sz = 4
+    
+    For i = 1 To sz
+        If save_mode Then
+            ff = CallByName(fform, f(i), VbGet)
+            SaveSetting App.EXENAME, fform.Name & ".FormPos", f(i), ff
+        Else
+            def = CallByName(fform, f(i), VbGet)
+            ff = GetSetting(App.EXENAME, fform.Name & ".FormPos", f(i), def)
+            CallByName fform, f(i), VbLet, ff
+        End If
+    Next
+    
+End Sub
