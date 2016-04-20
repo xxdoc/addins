@@ -380,14 +380,22 @@ Private Function GetLine(lineNo As Long) As String
     Dim lret As Long
     Dim strBuffer As String
     Dim intLineLen As Integer
-    Const MAX_LINE_LEN = 300
+    Dim lngLength As Long
+    Dim lFirstCharIndexForLine As Long
     
-    strBuffer = Space(MAX_LINE_LEN) 'max width possible for line
+    lFirstCharIndexForLine = SendMessage(mrtf.hwnd, EM_LINEINDEX, lineNo, 0)
+    If lFirstCharIndexForLine < 1 Then Exit Function
+
+    lngLength = SendMessage(mrtf.hwnd, EM_LINELENGTH, lFirstCharIndexForLine, 0)
+    If lngLength < 1 Then Exit Function
+    
+    strBuffer = Space(lngLength + 20) 'max width possible for line
     intLineLen = SendMessageStr(mrtf.hwnd, EM_GETLINE, lineNo, strBuffer)
     GetLine = Left(strBuffer, intLineLen)
 
 
 End Function
+
 
 Private Function IndexOfFirstCharOnLine(lNo As Long)
     IndexOfFirstCharOnLine = SendMsg(EM_LINEINDEX, lNo)
