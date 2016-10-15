@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Object = "{BDC217C8-ED16-11CD-956C-0000C04E4C0A}#1.1#0"; "TABCTL32.OCX"
 Begin VB.Form frmAddRefs 
    BorderStyle     =   1  'Fixed Single
@@ -113,6 +113,7 @@ Begin VB.Form frmAddRefs
       TabPicture(1)   =   "frmAddRefs.frx":001C
       Tab(1).ControlEnabled=   0   'False
       Tab(1).Control(0)=   "lv2"
+      Tab(1).Control(0).Enabled=   0   'False
       Tab(1).ControlCount=   1
       Begin MSComctlLib.ListView lv 
          Height          =   3030
@@ -198,7 +199,11 @@ Private Sub Form_Load()
     'DoEvents
     
     reg.hive = HKEY_CLASSES_ROOT
-    BuildComponentList
+    'BuildComponentList 'you can not add component refs with the addin api apparently...
+                        '(this was originally developed for the logic and LazActiveX UI)
+    
+    SSTab1.Tab = 1
+    SSTab1.Enabled = False
     
 End Sub
 

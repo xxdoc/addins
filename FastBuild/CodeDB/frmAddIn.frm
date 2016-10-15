@@ -181,6 +181,7 @@ Begin VB.Form frmAddIn
       _ExtentX        =   14870
       _ExtentY        =   10663
       _Version        =   393217
+      Enabled         =   -1  'True
       ScrollBars      =   3
       RightMargin     =   50000
       TextRTF         =   $"frmAddIn.frx":0000
@@ -633,6 +634,7 @@ Private Sub lv_OleDragDrop(Data As MSComctlLib.DataObject, Effect As Long, Butto
     For Each f In Data.Files
         AddFile CStr(f)
     Next
+    optFile_Click
 End Sub
 
 Private Sub lv_UserHitReturnInFilter()
