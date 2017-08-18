@@ -1,0 +1,8 @@
+frmAddIn = 22, 22, 990, 691, , 44, 44, 1120, 842, C
+modLog = 154, 154, 1122, 823, 
+modHook = 132, 132, 1100, 801, 
+modCallBack = 66, 66, 1034, 735, 
+conAddIn = 176, 176, 1144, 845, Z, 0, 0, 0, 0, C
+modDisasm = 110, 110, 1078, 779, 
+modCheckingOptions = 88, 88, 1249, 757, 
+modFormIcon = 0, 0, 0, 0, C

@@ -6,7 +6,7 @@ Object={3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0; RICHTX32.OCX
 Class=CSelection; CSelection.cls
 Module=Module1; Module1.bas
 Class=CProcess; CProcess.cls
-Object={831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0; MSCOMCTL.OCX
+Object={831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0; mscomctl.ocx
 Form=frmListProcess.frm
 Startup="frmAddIn"
 HelpFile=""
@@ -37,6 +37,7 @@ Unattended=0
 Retained=0
 ThreadPerObject=0
 MaxNumberOfThreads=1
+DebugStartupOption=0
 
 [MS Transaction Server]
 AutoRefresh=1

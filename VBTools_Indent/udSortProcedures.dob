@@ -1,0 +1,412 @@
+VERSION 5.00
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
+Begin VB.UserDocument udSortProcedures 
+   ClientHeight    =   2520
+   ClientLeft      =   0
+   ClientTop       =   0
+   ClientWidth     =   2565
+   HScrollSmallChange=   225
+   ScaleHeight     =   2520
+   ScaleWidth      =   2565
+   VScrollSmallChange=   225
+   Begin MSComctlLib.ListView lstProcList 
+      Height          =   510
+      Left            =   0
+      TabIndex        =   0
+      Top             =   225
+      Width           =   915
+      _ExtentX        =   1614
+      _ExtentY        =   900
+      View            =   3
+      LabelEdit       =   1
+      LabelWrap       =   -1  'True
+      HideSelection   =   -1  'True
+      AllowReorder    =   -1  'True
+      FullRowSelect   =   -1  'True
+      GridLines       =   -1  'True
+      _Version        =   393217
+      ForeColor       =   -2147483640
+      BackColor       =   -2147483643
+      BorderStyle     =   1
+      Appearance      =   1
+      NumItems        =   4
+      BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         Text            =   "Proc Name"
+         Object.Width           =   2540
+      EndProperty
+      BeginProperty ColumnHeader(2) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   1
+         Text            =   "Type"
+         Object.Width           =   2540
+      EndProperty
+      BeginProperty ColumnHeader(3) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   2
+         Text            =   "Scope"
+         Object.Width           =   2540
+      EndProperty
+      BeginProperty ColumnHeader(4) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   3
+         Text            =   "Line #"
+         Object.Width           =   2540
+      EndProperty
+   End
+   Begin MSComctlLib.ListView lstFav 
+      Height          =   510
+      Left            =   0
+      TabIndex        =   2
+      Top             =   1080
+      Width           =   915
+      _ExtentX        =   1614
+      _ExtentY        =   900
+      View            =   3
+      LabelEdit       =   1
+      LabelWrap       =   -1  'True
+      HideSelection   =   -1  'True
+      AllowReorder    =   -1  'True
+      FullRowSelect   =   -1  'True
+      GridLines       =   -1  'True
+      _Version        =   393217
+      ForeColor       =   -2147483640
+      BackColor       =   -2147483643
+      BorderStyle     =   1
+      Appearance      =   1
+      NumItems        =   5
+      BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         Text            =   "Proc Name"
+         Object.Width           =   2540
+      EndProperty
+      BeginProperty ColumnHeader(2) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   1
+         Text            =   "Type"
+         Object.Width           =   2540
+      EndProperty
+      BeginProperty ColumnHeader(3) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   2
+         Text            =   "Scope"
+         Object.Width           =   2540
+      EndProperty
+      BeginProperty ColumnHeader(4) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   3
+         Text            =   "Line #"
+         Object.Width           =   2540
+      EndProperty
+      BeginProperty ColumnHeader(5) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   4
+         Text            =   "Module"
+         Object.Width           =   2540
+      EndProperty
+   End
+   Begin VB.Line lnSep2 
+      BorderColor     =   &H00FFFFFF&
+      X1              =   990
+      X2              =   2475
+      Y1              =   900
+      Y2              =   900
+   End
+   Begin VB.Line lnSep1 
+      X1              =   945
+      X2              =   2610
+      Y1              =   855
+      Y2              =   855
+   End
+   Begin VB.Label lblFav 
+      AutoSize        =   -1  'True
+      BackStyle       =   0  'Transparent
+      Caption         =   "Favourites"
+      Height          =   195
+      Left            =   0
+      TabIndex        =   3
+      Top             =   810
+      Width           =   735
+   End
+   Begin VB.Label lblCurrModule 
+      AutoSize        =   -1  'True
+      BackStyle       =   0  'Transparent
+      Caption         =   "                 "
+      Height          =   195
+      Left            =   0
+      TabIndex        =   1
+      Top             =   0
+      Width           =   765
+   End
+End
+Attribute VB_Name = "udSortProcedures"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = True
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = True
+Option Explicit
+
+'
+' Made By Michael Ciurescu (CVMichael)
+'
+
+Private Const LVM_FIRST As Long = &H1000
+Private Const LVM_SETCOLUMNWIDTH As Long = (LVM_FIRST + 30)
+Private Const LVSCW_AUTOSIZE As Long = -1
+Private Const LVSCW_AUTOSIZE_USEHEADER As Long = -2
+
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
+
+Public MyWindow As Window
+Public VBInstance As VBIDE.VBE
+Private WithEvents CmpHandler  As VBComponentsEvents  'components event handler
+Attribute CmpHandler.VB_VarHelpID = -1
+Private Split1Per As Single
+
+Private StartSplit1Size As Boolean
+Private Declare Function SetCapture Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function ReleaseCapture Lib "user32" () As Long
+
+
+Private Sub CmpHandler_ItemSelected(ByVal VBComponent As VBIDE.VBComponent)
+    RefreshList VBComponent.Name
+End Sub
+
+Private Sub CmpHandler_ItemActivated(ByVal VBComponent As VBIDE.VBComponent)
+    RefreshList VBComponent.Name
+End Sub
+
+Private Sub lstFav_DblClick()
+    If Not (lstFav.SelectedItem Is Nothing) Then
+        GoToLine Val(lstFav.SelectedItem.SubItems(3)), lstFav.SelectedItem.SubItems(4)
+    End If
+End Sub
+
+Private Sub lstFav_KeyDown(KeyCode As Integer, Shift As Integer)
+    Dim K As Long
+    
+    If KeyCode = 46 And Not (lstFav.SelectedItem Is Nothing) Then
+        lstFav.ListItems.Remove lstFav.SelectedItem.Index
+        
+        For K = 0 To lstFav.ColumnHeaders.Count - 1
+            SendMessage lstFav.hwnd, LVM_SETCOLUMNWIDTH, K, ByVal LVSCW_AUTOSIZE
+        Next
+    End If
+End Sub
+
+Private Sub lstProcList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    Static LastColClick As Long, LastSortOrder As Long
+    Dim K As Long
+    
+    lstProcList.Visible = False
+    
+    If ColumnHeader.Index = 4 Then
+        For K = 1 To lstProcList.ListItems.Count
+            lstProcList.ListItems(K).SubItems(3) = Format(Val(lstProcList.ListItems(K).SubItems(3)), "000000")
+        Next K
+    End If
+    
+    If LastColClick = ColumnHeader.Index - 1 Then
+        lstProcList.SortOrder = IIf(LastSortOrder = lvwAscending, lvwDescending, lvwAscending)
+    Else
+        lstProcList.SortKey = ColumnHeader.Index - 1
+        lstProcList.SortOrder = lvwAscending
+        lstProcList.Sorted = True
+    End If
+    
+    If ColumnHeader.Index = 4 Then
+        For K = 1 To lstProcList.ListItems.Count
+            lstProcList.ListItems(K).SubItems(3) = Val(lstProcList.ListItems(K).SubItems(3))
+        Next K
+    End If
+    
+    LastSortOrder = lstProcList.SortOrder
+    LastColClick = ColumnHeader.Index - 1
+    lstProcList.Visible = True
+    lstProcList.Refresh
+End Sub
+
+Private Sub lstProcList_DblClick()
+    If Not (lstProcList.SelectedItem Is Nothing) Then
+        GoToLine Val(lstProcList.SelectedItem.SubItems(3)), lblCurrModule.Caption
+    End If
+End Sub
+
+Private Sub GoToLine(ByVal LineNum As Long, ByVal ModuleName As String)
+    Dim K As Long
+    Dim CP As CodePane
+    
+    For K = 1 To VBInstance.CodePanes.Count
+        If VBInstance.CodePanes(K).CodeModule.Parent.Name = ModuleName Then
+            Set CP = VBInstance.CodePanes(K)
+            Exit For
+        End If
+    Next K
+    
+    If Not (CP Is Nothing) Then
+        CP.Show
+        CP.CodeModule.CodePane.SetSelection LineNum, 1, LineNum, 1
+        CP.CodeModule.CodePane.TopLine = LineNum
+        CP.Window.Visible = True
+    End If
+End Sub
+
+Private Sub lstProcList_KeyUp(KeyCode As Integer, Shift As Integer)
+    Dim K As Long
+    
+    If KeyCode = 70 And Shift = 2 Then
+        If Not (lstProcList.SelectedItem Is Nothing) Then
+            With lstFav.ListItems.Add(, , lstProcList.SelectedItem.Text)
+                .SubItems(1) = lstProcList.SelectedItem.SubItems(1)
+                .SubItems(2) = lstProcList.SelectedItem.SubItems(2)
+                .SubItems(3) = lstProcList.SelectedItem.SubItems(3)
+                .SubItems(4) = lblCurrModule.Caption
+            End With
+            
+            For K = 0 To lstFav.ColumnHeaders.Count - 1
+                SendMessage lstFav.hwnd, LVM_SETCOLUMNWIDTH, K, ByVal LVSCW_AUTOSIZE
+            Next
+        End If
+    End If
+End Sub
+
+Private Sub UserDocument_Hide()
+    SaveSetting "VBTools", "udSortProcedures", "PL1", lstProcList.ColumnHeaders(1).Position
+    SaveSetting "VBTools", "udSortProcedures", "PL2", lstProcList.ColumnHeaders(2).Position
+    SaveSetting "VBTools", "udSortProcedures", "PL3", lstProcList.ColumnHeaders(3).Position
+    SaveSetting "VBTools", "udSortProcedures", "PL4", lstProcList.ColumnHeaders(4).Position
+    
+    SaveSetting "VBTools", "udSortProcedures", "FV1", lstFav.ColumnHeaders(1).Position
+    SaveSetting "VBTools", "udSortProcedures", "FV2", lstFav.ColumnHeaders(2).Position
+    SaveSetting "VBTools", "udSortProcedures", "FV3", lstFav.ColumnHeaders(3).Position
+    SaveSetting "VBTools", "udSortProcedures", "FV4", lstFav.ColumnHeaders(4).Position
+    SaveSetting "VBTools", "udSortProcedures", "FV5", lstFav.ColumnHeaders(5).Position
+    
+    SaveSetting "VBTools", "udSortProcedures", "Split1", CStr(Split1Per)
+    
+    Set CmpHandler = Nothing
+End Sub
+
+Private Sub UserDocument_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    If Y >= (UserDocument.ScaleHeight * Split1Per) - 45 And Y <= (UserDocument.ScaleHeight * Split1Per) + 45 Then
+        SetCapture UserDocument.hwnd
+        StartSplit1Size = True
+    End If
+    
+    UserDocument_MouseMove Button, Shift, X, Y
+End Sub
+
+Private Sub UserDocument_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    If Y >= (UserDocument.ScaleHeight * Split1Per) - 45 And Y <= (UserDocument.ScaleHeight * Split1Per) + 45 Then
+        UserDocument.MousePointer = 7
+        If Not StartSplit1Size Then SetCapture UserDocument.hwnd
+    Else
+        UserDocument.MousePointer = 0
+        If Not StartSplit1Size Then ReleaseCapture
+    End If
+    
+    If Button = 1 And StartSplit1Size Then
+        If Y < 1060 Then Y = 1060
+        If Y > UserDocument.ScaleHeight - lblFav.Height Then Y = UserDocument.ScaleHeight - lblFav.Height
+        
+        Split1Per = Y / UserDocument.ScaleHeight
+        UserDocument_Resize
+    End If
+End Sub
+
+Private Sub UserDocument_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    ReleaseCapture
+    StartSplit1Size = False
+End Sub
+
+Private Sub UserDocument_Resize()
+    On Error Resume Next
+    
+    lblFav.Top = (UserDocument.ScaleHeight * Split1Per) - (lblFav.Height / 2)
+    
+    lstProcList.Move 0, lblCurrModule.Height + 15, UserDocument.ScaleWidth, lblFav.Top - (lblCurrModule.Height + 15)
+    
+    lnSep1.X1 = lblFav.Width + 30
+    lnSep1.X2 = UserDocument.ScaleWidth
+    lnSep1.Y1 = UserDocument.ScaleHeight * Split1Per
+    lnSep1.Y2 = lnSep1.Y1
+    
+    lnSep2.X1 = lnSep1.X1
+    lnSep2.X2 = lnSep1.X2
+    lnSep2.Y1 = lnSep1.Y1 + 15
+    lnSep2.Y2 = lnSep2.Y1
+    
+    lstFav.Move 0, lblFav.Top + lblFav.Height, UserDocument.ScaleWidth
+    lstFav.Height = UserDocument.ScaleHeight - lstFav.Top
+End Sub
+
+Private Sub UserDocument_Show()
+    Set CmpHandler = VBInstance.Events.VBComponentsEvents(Nothing)
+    
+    RefreshList
+    
+    lstProcList.ColumnHeaders(1).Position = Val(GetSetting("VBTools", "udSortProcedures", "PL1", 1))
+    lstProcList.ColumnHeaders(2).Position = Val(GetSetting("VBTools", "udSortProcedures", "PL2", 2))
+    lstProcList.ColumnHeaders(3).Position = Val(GetSetting("VBTools", "udSortProcedures", "PL3", 3))
+    lstProcList.ColumnHeaders(4).Position = Val(GetSetting("VBTools", "udSortProcedures", "PL4", 4))
+    
+    lstFav.ColumnHeaders(1).Position = Val(GetSetting("VBTools", "udSortProcedures", "FV1", 1))
+    lstFav.ColumnHeaders(2).Position = Val(GetSetting("VBTools", "udSortProcedures", "FV2", 2))
+    lstFav.ColumnHeaders(3).Position = Val(GetSetting("VBTools", "udSortProcedures", "FV3", 3))
+    lstFav.ColumnHeaders(4).Position = Val(GetSetting("VBTools", "udSortProcedures", "FV4", 4))
+    lstFav.ColumnHeaders(5).Position = Val(GetSetting("VBTools", "udSortProcedures", "FV5", 5))
+    
+    Split1Per = Val(GetSetting("VBTools", "udSortProcedures", "Split1", 0.5))
+    
+    UserDocument_Resize
+End Sub
+
+Private Sub RefreshList(Optional ByVal ModuleName As String)
+    Dim K As Long
+    Dim CM As CodeModule
+    
+    lstProcList.Visible = False
+    lstProcList.ListItems.Clear
+    
+    If Len(ModuleName) > 0 Then
+        For K = 1 To VBInstance.CodePanes.Count
+            If VBInstance.CodePanes(K).CodeModule.Parent.Name = ModuleName Then
+                Set CM = VBInstance.CodePanes(K).CodeModule
+                Exit For
+            End If
+        Next K
+    Else
+        If Not (VBInstance.ActiveCodePane Is Nothing) Then Set CM = VBInstance.ActiveCodePane.CodeModule
+    End If
+    
+    If CM Is Nothing Then
+        lblCurrModule.Caption = "(" & ModuleName & " - Code Module not opened)"
+    Else
+        For K = 1 To CM.Members.Count
+'            If CM.Members(K).Type <> vbext_mt_Const And CM.Members(K).Type <> vbext_mt_Event And CM.Members(K).Type <> vbext_mt_Variable Then
+            With lstProcList.ListItems.Add(, , CM.Members(K).Name)
+                If CM.CodePane.CodeModule.Lines(Val(CM.Members(K).CodeLocation), 1) Like "*Declare * Lib *" Then
+                    .SubItems(1) = "1 Declare"
+                Else
+                    .SubItems(1) = Choose(CM.Members(K).Type, "1 Method", "2 Property", "3 Variable", "4 Event", "5 Const", "6 Const ??", "7 EventSink")
+                End If
+                
+                .SubItems(2) = Choose(CM.Members(K).Scope, "1 Private", "2 Public", "3 Friend")
+                
+                If lstProcList.Sorted And lstProcList.SortKey = 3 Then
+                    .SubItems(3) = Format(CM.Members(K).CodeLocation, "000000")
+                Else
+                    .SubItems(3) = CM.Members(K).CodeLocation
+                End If
+            End With
+'            End If
+        Next K
+        
+        If lstProcList.Sorted And lstProcList.SortKey = 3 Then
+            For K = 1 To lstProcList.ListItems.Count
+                lstProcList.ListItems(K).SubItems(3) = Val(lstProcList.ListItems(K).SubItems(3))
+            Next K
+        End If
+        
+        For K = 0 To lstProcList.ColumnHeaders.Count - 1
+            SendMessage lstProcList.hwnd, LVM_SETCOLUMNWIDTH, K, ByVal LVSCW_AUTOSIZE
+        Next
+        
+        lblCurrModule.Caption = CM.Parent.Name
+    End If
+    
+    DoEvents
+    lstProcList.Visible = True
+    lstProcList.Refresh
+End Sub
