@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form frmFindAll 
    Caption         =   "  Source Search"
    ClientHeight    =   3765
@@ -448,7 +448,7 @@ Public Sub DoSearch(lv As ListView, strfind As String, Optional wholeWord As Boo
         If bCancel Then Exit For
     Next proj
       
-    Me.Caption = "Searched " & modules & " Modules found " & hits & " results"
+    Me.Caption = "Searched " & modules & " Modules found " & hits & " results in " & lvMod.ListItems.Count & " files"
     cmdSearch.Caption = "Search"
     
     lvMod_ItemClick lvMod.ListItems(1)

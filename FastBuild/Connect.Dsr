@@ -498,7 +498,7 @@ Private Sub mnuExecute_Click(ByVal CommandBarControl As Object, handled As Boole
     Shell fastBuildPath & cmdLine, vbNormalFocus
     
     If Err.Number <> 0 Then
-        MsgBox Err.Description, vbExclamation
+        MsgBox "Menu Execute Error: " & Err.Description, vbExclamation
     End If
     
 End Sub
@@ -526,11 +526,11 @@ Private Function AddButton(caption As String, resImg As Long) As Office.CommandB
     Dim orgData As String
     Dim ipict As IPictureDisp
     
-    On Error GoTo hell
+    On Error Resume Next
     
 1    If VBInstance.CommandBars.Count = 0 Then VBInstance.CommandBars.Add
 
-    'orgData = Clipboard.GetText
+    orgData = Clipboard.GetText
     Clipboard.Clear
     
 2    VBInstance.CommandBars(1).Visible = True
@@ -545,11 +545,11 @@ Private Function AddButton(caption As String, resImg As Long) As Office.CommandB
      End If
 9    Set AddButton = cbMenu
     
-    'Clipboard.Clear
-    'If Len(orgData) > 0 Then Clipboard.SetText orgData
+    Clipboard.Clear
+    If Len(orgData) > 0 Then Clipboard.SetText orgData
     
     Exit Function
-hell:
+hell: 'this can barf with typename(cbmenu) = nothing
     MsgBox "FastBuild.AddButton: " & caption & " Err: " & Err.Description & " line: " & Erl & " " & TypeName(cbMenu)
     
 End Function
