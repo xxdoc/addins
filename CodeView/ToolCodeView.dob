@@ -184,6 +184,9 @@ Begin VB.UserDocument ToolCodeView
       Begin VB.Menu mnuShowLineCount 
          Caption         =   "Show Line Count"
       End
+      Begin VB.Menu mnuCopyPublic 
+         Caption         =   "Copy Public"
+      End
    End
 End
 Attribute VB_Name = "ToolCodeView"
@@ -236,6 +239,10 @@ Private Sub CodeView_KeyDown(KeyCode As Integer, Shift As Integer)
 End Sub
 
 Private Sub CodeView_Mouseup(Button As Integer, Shift As Integer, x As Single, y As Single)
+    On Error Resume Next
+    If Not CodeView.SelectedItem Is Nothing Then
+        mnuCopyPublic.Visible = (CodeView.SelectedItem.text = "Functions")
+    End If
     If Button = vbRightButton Then PopupMenu mnupopup
 End Sub
 
@@ -314,13 +321,14 @@ Sub Reload(Optional NewModule As CodeModule)
 
     Const hash As String = "#"
     Dim mber As Member
-    Dim n As Node
+    Dim n As Node, nn As Node
     Dim I As Long     'used to set image index
     Dim pos As Long
     Dim loc As Long, lcnt As Long
     Dim mType As Long
     Dim curProj As String
     Dim nodeName As String
+    Dim protoType As String
     
     On Error Resume Next
             
@@ -410,6 +418,7 @@ Sub Reload(Optional NewModule As CodeModule)
             nodeName = nodeName & " " & lcnt
         End If
             
+        protoType = ActiveCodeModule.Lines(loc, 1)
         
         If Len(txtFilter) > 0 Then
             If VBA.Left(txtFilter, 1) = "-" And Len(txtFilter) > 1 Then   'subtractive filter like -mnu,cmd,lv
@@ -425,15 +434,18 @@ Sub Reload(Optional NewModule As CodeModule)
                     End If
                 Next
                 If addit Then
-                    CodeView.Nodes.Add Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I
+                    Set nn = CodeView.Nodes.Add(Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I)
+                    nn.Tag = protoType
                 Else
                     'Stop
                 End If
             ElseIf InStr(1, mber.Name, txtFilter, vbTextCompare) > 0 Then
-                CodeView.Nodes.Add Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I
+                Set nn = CodeView.Nodes.Add(Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I)
+                nn.Tag = protoType
             End If
         Else
-            CodeView.Nodes.Add Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I
+            Set nn = CodeView.Nodes.Add(Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I)
+            nn.Tag = protoType
         End If
                 
     Next
@@ -477,6 +489,28 @@ Private Sub lblFilter_Click()
 End Sub
 
  
+Private Sub mnuCopyPublic_Click()
+    On Error Resume Next
+    Dim n As Node
+    Dim x As String
+    Dim text As String
+    Dim a As Long
+    
+    For Each n In CodeView.Nodes
+        If n.parent = Nodes(vbext_mt_Method) Then
+            text = n.Tag
+            'text = n.text
+            'a = InStr(text, " ")
+            'If a > 0 Then text = Mid(text, 1, a)
+            If n.Image = 1 Then x = x & text & vbCrLf
+        End If
+    Next
+
+    Clipboard.Clear
+    Clipboard.SetText x
+        
+End Sub
+
 Private Sub mnuExtractAsHTML_Click()
     On Error Resume Next
     Dim body As String
