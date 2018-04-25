@@ -10,6 +10,7 @@ UserDocument=ToolCodeView.dob
 Form=frmFindAll.frm
 Class=CResult; CResult.cls
 Class=CModule; CModule.cls
+UserControl=HistoryCombo.ctl
 Startup="(None)"
 HelpFile=""
 Title="CodeView"
