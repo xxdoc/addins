@@ -142,6 +142,10 @@ Private Sub AddinInstance_OnConnection(ByVal Application As Object, ByVal Connec
         Me.Show
     Else
     
+        If GetSetting("FastBuild", "Settings", "DisplayAsHex", 0) = "1" Then
+            LoadHexToolTipsDll
+        End If
+        
         MemWindowExe = App.path & "\MemoryWindow\standalone.exe"
         CodeDBExe = App.path & "\CodeDB\CodeDB.exe"
         APIAddInExe = App.path & "\API_AddIn\API_AddIn.exe"

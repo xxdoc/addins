@@ -52,11 +52,14 @@ WNDPROC OldWndProc = NULL;
 int WindowWidth = 0;
 HWND hookedHWND = 0;   //tooltips use the same HWND for every run and every difference code editor window..we only have to hook once..
 HFONT hFont;
+const bool dbgMsg = false;
+#define ERROR_NO_KEY      0x11223344
+char my_regKey[200] = "Software\\VB and VBA Program Settings\\FastBuild\\Settings";
+
 
 void Closing(void){ msg("***** Injected Process Terminated *****"); exit(0);}
 	
 extern "C" __declspec (dllexport) int NullSub(void){ return 1;} //so we have an export to hardcode add to pe table if we want.
-
 
 BOOL APIENTRY DllMain( HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
@@ -154,7 +157,7 @@ int AppendHexIfOk(HWND h, char* curCaption){
 	newText = (char*)malloc(curLen + 100);
 	int numericVal = atoi((char*)(curCaption+equalPos+1));
 	sprintf(newText, "  %s   [0x%X] ", curCaption, numericVal);
-	LogAPI("Modified ToolTip(%x) newText=%s", h, newText);
+	if(dbgMsg) LogAPI("Modified ToolTip(%x) newText=%s", h, newText);
     
 	return 1;
 }
@@ -188,34 +191,59 @@ void resizeToolTip(HWND hwnd){
 	 //SendMessage(hWnd, TTM_ADJUSTRECT, TRUE, (LPARAM)&rc); 			  
 }
 
+int ReadRegInt(char* baseKey, char* name){
+
+	 char tmp[20] = {0};
+     unsigned long l = sizeof(tmp);
+	 HKEY h;
+	 
+	 int rv = RegOpenKeyEx(HKEY_CURRENT_USER, baseKey, 0, KEY_READ, &h);
+	 rv = RegQueryValueExA(h, name, 0,0, (unsigned char*)tmp, &l);
+	 RegCloseKey(h);
+
+	 if(rv != ERROR_SUCCESS) return ERROR_NO_KEY;
+	 return atoi(tmp);
+}
+
 BOOL __stdcall My_SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int  X, int  Y, int  cx, int  cy, UINT uFlags){
 
 	BOOL rv;
 	char buf[500] = {0};
 	
 	SubclassActive = false;
-	char *caption = windowText(hWnd); //always returns a malloced buf to free
 	int sz = GetClassName(hWnd, buf, sizeof(buf));
 	
 	if(sz!=0 && strcmp(buf,"tooltips_class32") == 0 && (uFlags & SWP_SHOWWINDOW) == SWP_SHOWWINDOW){
- 
-		if(AppendHexIfOk(hWnd,caption)==1){
-			SubclassActive = true;
-			LogAPI("%x  Modified ToolTip.SetWindowPos h=%x   flags=%x   org=%s (%d,%d,%d,%d)", CalledFrom(), hWnd, uFlags, caption,X,Y,cx,cy);
-			rv = Real_SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
-			resizeToolTip(hWnd);
-			free(caption);
-			return rv;
-		}
-		else{
-			LogAPI("%x  No modify ToolTip.SetWindowPos h=%x   flags=%x   %s", CalledFrom(), hWnd, uFlags, caption);
+		
+		int v = ReadRegInt(my_regKey, "DisplayAsHex");
+
+		if(v==0){
+			if(dbgMsg) LogAPI("%x  SetWindowPos Hook Disabled h=%x   flags=%x", CalledFrom(), hWnd, uFlags);
+		}else{ 
+			if(v == ERROR_NO_KEY && dbgMsg) LogAPI("SetWindowPos Hook no reg key set continuing...");
+
+			char *caption = windowText(hWnd); //always returns a malloced buf to free
+			
+			if(AppendHexIfOk(hWnd,caption)==1){
+				SubclassActive = true;
+				if(dbgMsg) LogAPI("%x  Modified ToolTip.SetWindowPos h=%x   flags=%x   org=%s (%d,%d,%d,%d)", CalledFrom(), hWnd, uFlags, caption,X,Y,cx,cy);
+				rv = Real_SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+				resizeToolTip(hWnd);
+				free(caption);
+				return rv;
+			}
+			else{
+				if(dbgMsg) LogAPI("%x  No modify ToolTip.SetWindowPos h=%x   flags=%x   %s", CalledFrom(), hWnd, uFlags, caption);
+				free(caption);
+			}
 		}
 
+		
 	}else{
-		LogAPI("%x  SetWindowPos h=%x   flags=%x   org=%s (%d,%d,%d,%d)", CalledFrom(), hWnd, uFlags, caption,X,Y,cx,cy);
+		if(dbgMsg) LogAPI("%x  SetWindowPos h=%x flags=%x  class= %s (x=%d,y=%d,cx=%d,cy=%d)", CalledFrom(), hWnd, uFlags, buf, X,Y,cx,cy);
 	}
 
-	free(caption);
+	
 	return Real_SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 
 }
