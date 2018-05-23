@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.UserDocument ToolCodeView 
    ClientHeight    =   3750
    ClientLeft      =   0
@@ -151,6 +151,15 @@ Begin VB.UserDocument ToolCodeView
       Style           =   7
       ImageList       =   "Babel"
       Appearance      =   1
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+         Name            =   "Courier New"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
    End
    Begin VB.Menu mnupopup 
       Caption         =   "mnupopup"
@@ -171,6 +180,12 @@ Begin VB.UserDocument ToolCodeView
          Caption         =   "Simple Rename"
          Enabled         =   0   'False
          Visible         =   0   'False
+      End
+      Begin VB.Menu mnuShowLineCount 
+         Caption         =   "Show Line Count"
+      End
+      Begin VB.Menu mnuCopyPublic 
+         Caption         =   "Copy Public"
       End
    End
 End
@@ -224,6 +239,10 @@ Private Sub CodeView_KeyDown(KeyCode As Integer, Shift As Integer)
 End Sub
 
 Private Sub CodeView_Mouseup(Button As Integer, Shift As Integer, x As Single, y As Single)
+    On Error Resume Next
+    If Not CodeView.SelectedItem Is Nothing Then
+        mnuCopyPublic.Visible = (CodeView.SelectedItem.text = "Functions")
+    End If
     If Button = vbRightButton Then PopupMenu mnupopup
 End Sub
 
@@ -280,6 +299,8 @@ Sub InitCodeView()
     Nodes(vbext_mt_Event).Expanded = False 'to many
     Nodes(vbext_mt_Method).Expanded = True
     
+    mnuShowLineCount.Checked = CBool(GetMySetting("ShowLineCount", 0))
+        
     Exit Sub
 hell:
     MsgBox "Err in InitCodeView: " & Err.Description
@@ -300,12 +321,14 @@ Sub Reload(Optional NewModule As CodeModule)
 
     Const hash As String = "#"
     Dim mber As Member
-    Dim n As Node
+    Dim n As Node, nn As Node
     Dim I As Long     'used to set image index
     Dim pos As Long
-    Dim loc As Long
+    Dim loc As Long, lcnt As Long
     Dim mType As Long
     Dim curProj As String
+    Dim nodeName As String
+    Dim protoType As String
     
     On Error Resume Next
             
@@ -374,12 +397,28 @@ Sub Reload(Optional NewModule As CodeModule)
         Select Case mType
             Case vbext_mt_Method, vbext_mt_Event
                 loc = ActiveCodeModule.ProcBodyLine(mber.Name, vbext_pk_Proc)
-                'lcnt = ActiveCodeModule.ProcCountLines(member.Name, vbext_pk_Proc)
+                lcnt = ActiveCodeModule.ProcCountLines(mber.Name, vbext_pk_Proc)
             Case vbext_mt_Property
                 loc = ActiveCodeModule.ProcBodyLine(mber.Name, vbext_pk_Get)
-                If loc = 0 Then loc = ActiveCodeModule.ProcBodyLine(mber.Name, vbext_pk_Let)
-                If loc = 0 Then loc = ActiveCodeModule.ProcBodyLine(mber.Name, vbext_pk_Set)
+                lcnt = ActiveCodeModule.ProcCountLines(mber.Name, vbext_pk_Get)
+                If loc = 0 Then
+                    loc = ActiveCodeModule.ProcBodyLine(mber.Name, vbext_pk_Let)
+                    lcnt = ActiveCodeModule.ProcCountLines(mber.Name, vbext_pk_Let)
+                End If
+                If loc = 0 Then
+                    loc = ActiveCodeModule.ProcBodyLine(mber.Name, vbext_pk_Set)
+                    lcnt = ActiveCodeModule.ProcCountLines(mber.Name, vbext_pk_Set)
+                End If
         End Select
+        
+        Const minLen = 20
+        nodeName = mber.Name
+        If mnuShowLineCount.Checked And mber.Type <> vbext_mt_Variable Then
+            If Len(nodeName) < minLen Then nodeName = Left(nodeName & String(minLen, " "), minLen)
+            nodeName = nodeName & " " & lcnt
+        End If
+            
+        protoType = ActiveCodeModule.Lines(loc, 1)
         
         If Len(txtFilter) > 0 Then
             If VBA.Left(txtFilter, 1) = "-" And Len(txtFilter) > 1 Then   'subtractive filter like -mnu,cmd,lv
@@ -395,20 +434,26 @@ Sub Reload(Optional NewModule As CodeModule)
                     End If
                 Next
                 If addit Then
-                    CodeView.Nodes.Add Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, mber.Name, mType + I
+                    Set nn = CodeView.Nodes.Add(Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I)
+                    nn.Tag = protoType
                 Else
                     'Stop
                 End If
             ElseIf InStr(1, mber.Name, txtFilter, vbTextCompare) > 0 Then
-                CodeView.Nodes.Add Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, mber.Name, mType + I
+                Set nn = CodeView.Nodes.Add(Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I)
+                nn.Tag = protoType
             End If
         Else
-            CodeView.Nodes.Add Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, mber.Name, mType + I
+            Set nn = CodeView.Nodes.Add(Nodes(mType), tvwChild, mber.Scope & mType & hash & loc & hash, nodeName, mType + I)
+            nn.Tag = protoType
         End If
                 
     Next
     
-    CodeView.Nodes("cv").text = ActiveCodeModule.parent.Name
+    nodeName = ActiveCodeModule.parent.Name
+    If mnuShowLineCount.Checked Then nodeName = nodeName & " " & ActiveCodeModule.CountOfLines
+    
+    CodeView.Nodes("cv").text = nodeName
     Nodes(vbext_mt_Const).Sorted = True
     Nodes(vbext_mt_Variable).Sorted = True
     Nodes(vbext_mt_Property).Sorted = True
@@ -418,11 +463,54 @@ Sub Reload(Optional NewModule As CodeModule)
     
 End Sub
 
+'crashs when compiled but not when debugging grrrr
+Private Function GetTotalLOC()
+
+    Dim comp As VBComponent
+    Dim proj As VBProject
+    Dim tot As Long
+
+    On Error Resume Next
+     Set proj = g_VBInstance.ActiveVBProject
+     'For Each proj In g_VBInstance.VBProjects
+       For Each comp In proj.VBComponents
+            If Len(comp.Name) > 0 Then  'i think related files cause crash on accessing comp.codemodule .name will be blank so we skip..
+                tot = tot + comp.CodeModule.CountOfLines
+            End If
+       Next
+    'Next
+
+    GetTotalLOC = tot
+
+End Function
+
 Private Sub lblFilter_Click()
     txtFilter.text = ""
 End Sub
 
  
+Private Sub mnuCopyPublic_Click()
+    On Error Resume Next
+    Dim n As Node
+    Dim x As String
+    Dim text As String
+    Dim a As Long
+    
+    For Each n In CodeView.Nodes
+        If n.parent = Nodes(vbext_mt_Method) Then
+            text = n.Tag
+            'text = n.text
+            'a = InStr(text, " ")
+            'If a > 0 Then text = Mid(text, 1, a)
+            If n.Image = 1 Then x = x & text & vbCrLf
+        End If
+    Next
+
+    Clipboard.Clear
+    Clipboard.SetText x
+        
+End Sub
+
 Private Sub mnuExtractAsHTML_Click()
     On Error Resume Next
     Dim body As String
@@ -443,9 +531,24 @@ End Sub
 
 Private Sub mnuFindReferences_Click()
     On Error Resume Next
+    Dim txt As String, a As Long
+    
     If ActiveCodeModule Is Nothing Then Exit Sub
     If CodeView.SelectedItem Is Nothing Then Exit Sub
-    frmFindAll.LaunchAndDoSearch CodeView.SelectedItem.text
+    
+    txt = CodeView.SelectedItem.text 'if there is a space in function name, line count is on strip it
+    a = InStr(1, txt, " ")
+    If a > 0 Then txt = Trim(Mid(txt, 1, a))
+    
+    frmFindAll.LaunchAndDoSearch txt
+End Sub
+
+Private Sub mnuShowLineCount_Click()
+    If Not initilized Then Exit Sub
+    mnuShowLineCount.Checked = Not mnuShowLineCount.Checked
+    SaveMySetting "ShowLineCount", CInt(mnuShowLineCount.Checked)
+    filterChanged = True
+    Reload
 End Sub
 
 Private Sub Timer_Timer()
@@ -467,7 +570,13 @@ Private Sub Timer_Timer()
 End Sub
 
 Private Sub txtFilter_Change()
-
+    
+    'we cheat and also use txtFilter as a basic command line entry point..
+    If VBA.Left(txtFilter, 1) = "?" Then
+        If LCase(txtFilter) = "?loc" Then txtFilter = txtFilter & " = " & GetTotalLOC()
+        Exit Sub
+    End If
+    
     If VBA.Left(txtFilter, 1) = "-" Then 'they are typing a subtractive filter..give them time to formulate it..
         If Len(txtFilter) = 1 Then Exit Sub
         If VBA.Right(txtFilter, 1) = "," Or VBA.Right(txtFilter, 1) = " " Then Exit Sub
