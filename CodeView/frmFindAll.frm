@@ -4,7 +4,7 @@ Begin VB.Form frmFindAll
    Caption         =   "  Source Search"
    ClientHeight    =   3765
    ClientLeft      =   60
-   ClientTop       =   345
+   ClientTop       =   630
    ClientWidth     =   11190
    Icon            =   "frmFindAll.frx":0000
    LinkTopic       =   "Form1"
@@ -156,6 +156,12 @@ Begin VB.Form frmFindAll
       Top             =   90
       Width           =   825
    End
+   Begin VB.Menu mnuPopup 
+      Caption         =   "mnuPopup"
+      Begin VB.Menu mnuCopyAll 
+         Caption         =   "Copy All"
+      End
+   End
 End
 Attribute VB_Name = "frmFindAll"
 Attribute VB_GlobalNameSpace = False
@@ -199,7 +205,7 @@ End Function
 
 Public Function GetActiveModuleName() As String
   On Error Resume Next
-  GetActiveModuleName = GetActiveCodePane.CodeModule.Name
+  GetActiveModuleName = GetActiveCodePane.CodeModule.name
   On Error GoTo 0
 End Function
 
@@ -387,13 +393,13 @@ Public Sub DoSearch(lv As ListView, strfind As String, Optional wholeWord As Boo
           For Each comp In proj.VBComponents
                 
                 Set parent = New CModule
-                parent.module = comp.Name & ModuleExt(comp.Type)
-                parent.proj = proj.Name
+                parent.module = comp.name & ModuleExt(comp.Type)
+                parent.proj = proj.name
                 
                 modules = modules + 1
-                Me.Caption = "Searching Component " & comp.Name
+                Me.Caption = "Searching Component " & comp.name
                 
-                If LenB(comp.Name) > 0 Then
+                If LenB(comp.name) > 0 Then
                 
                     Set CompMod = comp.CodeModule
     
@@ -413,7 +419,7 @@ Public Sub DoSearch(lv As ListView, strfind As String, Optional wholeWord As Boo
                             result.proc = GetProcName(CompMod, StartLine)
                             result.lineNo = StartLine
                             result.Text = Trim$(code)
-                            result.ComponentName = comp.Name
+                            result.ComponentName = comp.name
                             parent.hits.Add result
                             hits = hits + 1
                             code = Empty
@@ -485,6 +491,7 @@ Private Sub cmdSearch_Click()
 End Sub
 
 Private Sub Form_Load()
+    mnuPopup.Visible = False
     FormPos Me, True
     SetWindowTopMost Me
     historyFile = g_VBInstance.ActiveVBProject.filename & ".search.txt"
@@ -521,7 +528,7 @@ Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
 
 2    For Each proj In g_VBInstance.VBProjects
 3        For Each comp In proj.VBComponents
-4            If comp.Name = r.ComponentName Then
+4            If comp.name = r.ComponentName Then
 5                comp.CodeModule.CodePane.Show
 6                comp.CodeModule.CodePane.TopLine = r.lineNo
 '7                comp.CodeModule.CodePane.SetSelection r.lineNo, InStr(1, r.text, txtFind, vbTextCompare), r.lineNo, Len(txtFind)
@@ -534,6 +541,10 @@ Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
 hell:
     MsgBox "Error in lv_ItemClick: " & Erl & " - " & Err.Description
     
+End Sub
+
+Private Sub lv_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+    If Button = 2 Then PopupMenu mnuPopup
 End Sub
 
 Private Sub lvMod_ItemClick(ByVal Item As MSComctlLib.ListItem)
@@ -553,6 +564,16 @@ Private Sub lvMod_ItemClick(ByVal Item As MSComctlLib.ListItem)
         Set li.Tag = r
     Next
     
+End Sub
+
+Private Sub mnuCopyAll_Click()
+    Dim x() As String
+    Dim li As ListItem
+    For Each li In lv.ListItems
+        push x, Join(Array(li.Text, li.SubItems(1), li.SubItems(2)), vbTab)
+    Next
+    Clipboard.Clear
+    Clipboard.SetText Join(x, vbCrLf)
 End Sub
 
 Private Sub txtFind_KeyPress(KeyCode As Integer)
@@ -578,10 +599,10 @@ Sub FormPos(fform As Form, Optional andSize As Boolean = False, Optional save_mo
     For i = 1 To sz
         If save_mode Then
             ff = CallByName(fform, f(i), VbGet)
-            SaveSetting App.EXEName, fform.Name & ".FormPos", f(i), ff
+            SaveSetting App.EXEName, fform.name & ".FormPos", f(i), ff
         Else
             def = CallByName(fform, f(i), VbGet)
-            ff = GetSetting(App.EXEName, fform.Name & ".FormPos", f(i), def)
+            ff = GetSetting(App.EXEName, fform.name & ".FormPos", f(i), def)
             CallByName fform, f(i), VbLet, ff
         End If
     Next
