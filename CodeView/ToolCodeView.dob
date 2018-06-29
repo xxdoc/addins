@@ -245,7 +245,7 @@ Private Sub CodeView_Mouseup(Button As Integer, Shift As Integer, x As Single, y
     If Not CodeView.SelectedItem Is Nothing Then
         mnuCopyPublic.Visible = (CodeView.SelectedItem.Text = "Functions")
     End If
-    If Button = vbRightButton Then PopupMenu mnupopup
+    If Button = vbRightButton Then PopupMenu mnuPopup
 End Sub
 
 Private Sub CodeView_NodeClick(ByVal Node As MSComctlLib.Node)
@@ -318,6 +318,39 @@ Sub ClearCodeView()
     ClearChildNodes CodeView, vbNullString, Nodes(vbext_mt_Method)
     Unfreeze CodeView.hwnd
 End Sub
+
+'Private Function setVarDef(e As CEntry) As Boolean
+'
+'    'for variables the vb plugin api does not return the proper line number always :(
+'    Dim i As Integer
+'
+'    For i = 0 To 100
+'        x = ActiveCodeModule.Lines(e.loc + i, 1)
+'        If InStr(x, e.name) > 0 Then
+'            e.loc = e.loc + i
+'            e.proto = x
+'            setVarDef = True
+'            Exit For
+'        End If
+'    Next
+'
+'End Function
+
+Private Function getVarDefLine(name, start) As Long
+    
+    'for variables the vb plugin api does not return the proper line number always :(
+    'todo: could be more precise..
+    Dim i As Integer, x
+    
+    For i = 0 To 125
+        x = ActiveCodeModule.Lines(start + i, 1)
+        If InStr(x, name) > 0 Then
+            getVarDefLine = start + i
+            Exit For
+        End If
+    Next
+    
+End Function
 
 Sub Reload(Optional NewModule As CodeModule)
 
@@ -415,6 +448,8 @@ Sub Reload(Optional NewModule As CodeModule)
                     e.loc = ActiveCodeModule.ProcBodyLine(mber.name, vbext_pk_Set)
                     e.lcnt = ActiveCodeModule.ProcCountLines(mber.name, vbext_pk_Set)
                 End If
+            Case vbext_mt_Variable
+                e.loc = getVarDefLine(mber.name, e.loc)
         End Select
         
         Const minLen = 20
@@ -505,7 +540,6 @@ End Function
 Private Sub lblFilter_Click()
     txtFilter.Text = ""
 End Sub
-
  
 Private Sub mnuCopyPublic_Click()
     'On Error Resume Next
@@ -514,6 +548,22 @@ Private Sub mnuCopyPublic_Click()
     Dim Text As String
     Dim a As Long
     Dim e As CEntry
+    
+    If Nodes(vbext_mt_Variable).Children > 0 Then
+        push x, "'Variables"
+        For Each n In CodeView.Nodes
+            If Not n.parent Is Nothing Then
+                If n.parent = Nodes(vbext_mt_Variable) Then
+                        Set e = n.Tag
+                        If e.scope = 0 Then
+                            push x(), e.proto
+                        End If
+                        Debug.Print e.proto
+                End If
+            End If
+        Next
+        push x, ""
+    End If
     
     If Nodes(vbext_mt_Event).Children > 0 Then
         push x, "'Events"
