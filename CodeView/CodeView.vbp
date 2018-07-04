@@ -11,6 +11,7 @@ Form=frmFindAll.frm
 Class=CResult; CResult.cls
 Class=CModule; CModule.cls
 UserControl=HistoryCombo.ctl
+Class=CEntry; CEntry.cls
 Startup="(None)"
 HelpFile=""
 Title="CodeView"
