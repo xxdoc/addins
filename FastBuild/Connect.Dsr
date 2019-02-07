@@ -1,14 +1,14 @@
 VERSION 5.00
 Begin {AC0714F6-3D04-11D1-AE7D-00A0C90F26F4} Connect 
-   ClientHeight    =   14700
+   ClientHeight    =   12630
    ClientLeft      =   1740
    ClientTop       =   1545
-   ClientWidth     =   18000
-   _ExtentX        =   31750
-   _ExtentY        =   25929
+   ClientWidth     =   17685
+   _ExtentX        =   31194
+   _ExtentY        =   22278
    _Version        =   393216
-   Description     =   "Streamline Build Process"
-   DisplayName     =   "Fast Build"
+   Description     =   "Streamline Build Process "
+   DisplayName     =   "Fast Build "
    AppName         =   "Visual Basic"
    AppVer          =   "Visual Basic 6.0"
    LoadName        =   "Startup"
@@ -555,7 +555,8 @@ Private Function AddButton(caption As String, resImg As Long) As Office.CommandB
 2    VBInstance.CommandBars(1).Visible = True
 3    Set cbMenu = VBInstance.CommandBars(1).Controls.Add(1) ', , , VBInstance.CommandBars(2).Controls.Count)
 4    cbMenu.caption = caption
-5     Set ipict = LoadResPicture(resImg, 0)
+5    Set ipict = LoadResPicture(resImg, 0)
+
      If ipict Is Nothing Then
 6        MsgBox "Failed to load res picture: " & resImg
      Else
@@ -597,7 +598,8 @@ Private Function AddrefMenu(caption As String, Optional menuName As String = "&P
     Dim cbSubMenu As Office.CommandBarControl
     Dim i As Long, j As Long
     
-    On Error GoTo hell
+    'On Error GoTo hell
+    On Error Resume Next
 
     'this accounts for if the menuName is not present..
     For i = 1 To VBInstance.CommandBars(1).Controls.Count
@@ -645,7 +647,8 @@ Private Function FindMakeMenu() As Office.CommandBarControl
     Dim cbSubMenu As Office.CommandBarControl
     Dim i As Long
     
-    On Error GoTo hell
+    'On Error GoTo hell
+    On Error Resume Next
 
     For Each cbSubMenu In VBInstance.CommandBars(1).Controls("File").Controls
         i = i + 1

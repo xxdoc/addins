@@ -106,6 +106,8 @@ Option Compare Text
 '  MISCELLANEOUS COMMANDS
 '  ----------------------
 '
+'    CONSOLE - change subsystem to console
+'
 '    TIDY
 '       VB6 DLL linking produces EXP, LIB and DEF files, which are not
 '       usually needed. Include this command in the VBC file and we
@@ -138,7 +140,9 @@ Option Compare Text
 '
 '========================================================================
 
-Const VB6FOLDER = "C:\Program Files\MicroSoft Visual Studio\VB98"
+Public VB6FOLDER As String
+Const VB6FOLDER1 = "C:\Program Files\MicroSoft Visual Studio\VB98"
+Const VB6FOLDER2 = "C:\Program Files (x86)\Microsoft Visual Studio\VB98"
 Const logfile = "c:\vbLink.log"
    
 Public EXEFILE  As String  ' full pathname of exe/dll file being
@@ -157,7 +161,7 @@ Dim wipeList()  As String  ' array of functions to wipe for replacement..
 Dim EXEPATH     As String  ' Folder containing OBJ files
 Dim xList       As String  ' Export request list
 
-Dim F           As Integer ' file unit
+Dim f           As Integer ' file unit
 
 Public RunVisible   As Long
 Dim isDLL       As Boolean
@@ -167,6 +171,8 @@ Dim DebugMode   As Boolean ' flag for DEBUG command
 Dim ShowStatus  As Boolean ' flag for STATUS command
 Dim TidyFlag    As Boolean ' flag for TIDY   command
 Dim NormalLink  As Boolean ' did we modify the link in any way?
+Dim ConsoleMode As Boolean
+
 Dim eMsg        As String  ' link error message
 Const LANG_US = &H409
 
@@ -186,6 +192,9 @@ Sub Main()
       frmLinkInfo.ShowError vbCommand
       Exit Sub
    End If
+   
+   If FolderExists(VB6FOLDER1) Then VB6FOLDER = VB6FOLDER1
+   If FolderExists(VB6FOLDER2) Then VB6FOLDER = VB6FOLDER2
    
    If Not FolderExists(VB6FOLDER) Then
         MsgBox "Folder not found correct path: " & VB6FOLDER
@@ -223,6 +232,8 @@ Sub Main()
    End If
    
    ProcessVBC cmdFile
+   
+   If ConsoleMode Then vbCommand = Replace(vbCommand, "/SUBSYSTEM:WINDOWS,4.0", "/SUBSYSTEM:CONSOLE")
    
    If DebugMode Then
         vbCommand = frmDebug.DebugCommandLine()
@@ -292,19 +303,19 @@ Sub RunCustomlink()
    '
    ' Run the real linker via a batch file, so we can check the results
    '
-   F = FreeFile
-   Open "c:\vbLink.bat" For Output As #F
-   Print #F, "@echo off"
-   Print #F, Left$(VB6FOLDER, 2) ' ensure project drive selected  '<--added from blog post
-   Print #F, "cd """ & VB6FOLDER & """"
-   Print #F, "VBLINK " & vbCommand & " 1> " & logfile
+   f = FreeFile
+   Open "c:\vbLink.bat" For Output As #f
+   Print #f, "@echo off"
+   Print #f, Left$(VB6FOLDER, 2) ' ensure project drive selected  '<--added from blog post
+   Print #f, "cd """ & VB6FOLDER & """"
+   Print #f, "VBLINK " & vbCommand & " 1> " & logfile
    
    If Len(PostBuild) > 0 Then
-        Print #F, PostBuild & " >> " & logfile
+        Print #f, PostBuild & " >> " & logfile
    End If
    
-   Print #F, "del c:\vbLink.bat"   ' make the BAT file tidy up
-   Close #F
+   Print #f, "del c:\vbLink.bat"   ' make the BAT file tidy up
+   Close #f
    
    Execute "c:\vbLink.bat", 1
    
@@ -334,11 +345,11 @@ Private Sub ProcessVBC(cmdFile As String)
 
    If Not FileExists(cmdFile) Then Exit Sub
    
-   F = FreeFile
-   Open cmdFile For Input As #F
+   f = FreeFile
+   Open cmdFile For Input As #f
    
-   Do Until EOF(F)                        ' ".vbc" Export Control File
-      Line Input #F, xKey
+   Do Until EOF(f)                        ' ".vbc" Export Control File
+      Line Input #f, xKey
       
       xKey = Replace(xKey, vbTab, Empty)        'ignore leading whitespace and empty lines
       xKey = Trim(xKey)
@@ -367,6 +378,7 @@ Private Sub ProcessVBC(cmdFile As String)
       Select Case LCase(pName(0))
          
          Case "postbuild": PostBuild = ExpandPaths(Mid(xKey, Len("postbuild") + 1))
+         Case "console":   ConsoleMode = True
          Case "debug":     DebugMode = True
          Case "status":    ShowStatus = True
          Case "tidy":      TidyFlag = True
@@ -441,7 +453,7 @@ Private Sub ProcessVBC(cmdFile As String)
 NextLine:
    Loop
    
-   Close #F
+   Close #f
    
    
    If xList = "" Then Exit Sub
@@ -457,20 +469,20 @@ NextLine:
    xName = EXEPATH & "\" & EXENAME & ".def"
    defFile = xName
    
-   F = FreeFile
-   Open xName For Output As #F
+   f = FreeFile
+   Open xName For Output As #f
    
    If isDLL Then 'otherwise this would set the DLL charateristic in pe header..we can export from exes too..
-        Print #F, "LIBRARY "; EXENAME
+        Print #f, "LIBRARY "; EXENAME
    End If
    
-   Print #F, "EXPORTS"
+   Print #f, "EXPORTS"
    
    For j = 1 To UBound(pName)
-      Print #F, "   " & pName(j)
+      Print #f, "   " & pName(j)
    Next
    
-   Close #F
+   Close #f
    
    If Right(vbCommand, 1) <> " " Then vbCommand = vbCommand & " "
    vbCommand = vbCommand & "/DEF:""" & xName & """"
@@ -481,7 +493,7 @@ End Sub
 Function WipeFunctions() As Boolean
    
    Dim x
-   Dim F As Long, i As Long
+   Dim f As Long, i As Long
    Dim fPath As String
    Dim data As String
    Dim pos As Long
@@ -509,19 +521,19 @@ Function WipeFunctions() As Boolean
         If Not FileExists(fPath) Then GoTo nextone
          
         data = ReadFile(fPath)
-        F = FreeFile
-        Open fPath For Binary As F
+        f = FreeFile
+        Open fPath For Binary As f
          
         delta = InStr(proto, "@") + 1
         pos = InStr(data, proto)
         If pos > 0 And delta > 1 Then
              'its going to be somethign like ?add@Module1@@AAGXXZ, lets change the module name..
-             Put F, pos + delta + 1, newModName
+             Put f, pos + delta + 1, newModName
         Else
              WipeFunctions = False
         End If
         
-        Close F
+        Close f
         
 nextone:
    Next
@@ -587,12 +599,12 @@ End Function
 Function ReadFile(filename) As String 'this one should be binary safe...
   On Error GoTo hell
   If Not FileExists(filename) Then Exit Function
-  F = FreeFile
+  f = FreeFile
   Dim b() As Byte
-  Open filename For Binary As #F
-  ReDim b(LOF(F) - 1)
-  Get F, , b()
-  Close #F
+  Open filename For Binary As #f
+  ReDim b(LOF(f) - 1)
+  Get f, , b()
+  Close #f
   ReadFile = StrConv(b(), vbUnicode, LANG_US)
   Exit Function
 hell:   ReadFile = ""
@@ -602,11 +614,11 @@ Function writeFile(path, it) As Boolean 'this one should be binary safe...
     On Error GoTo hell
     Dim b() As Byte
     If FileExists(path) Then Kill path
-    F = FreeFile
+    f = FreeFile
     b() = StrConv(it, vbFromUnicode, LANG_US)
-    Open path For Binary As #F
-    Put F, , b()
-    Close F
+    Open path For Binary As #f
+    Put f, , b()
+    Close f
     writeFile = True
     Exit Function
 hell: writeFile = False

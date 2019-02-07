@@ -8,7 +8,7 @@ Begin {AC0714F6-3D04-11D1-AE7D-00A0C90F26F4} Connect
    _ExtentY        =   19315
    _Version        =   393216
    Description     =   $"Connect.dsx":0000
-   DisplayName     =   "CodeView"
+   DisplayName     =   "CodeView "
    AppName         =   "Visual Basic"
    AppVer          =   "Visual Basic 6.0"
    LoadName        =   "Startup"
@@ -49,7 +49,8 @@ Sub Show()
 End Sub
 
 Private Sub AddinInstance_OnConnection(ByVal Application As Object, ByVal ConnectMode As AddInDesignerObjects.ext_ConnectMode, ByVal AddInInst As Object, custom() As Variant)
-    On Error GoTo error_handler
+    'On Error GoTo error_handler
+    On Error Resume Next
     
 1    Set g_VBInstance = Application
     If ConnectMode = ext_cm_External Then
