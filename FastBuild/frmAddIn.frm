@@ -13,6 +13,14 @@ Begin VB.Form frmAddIn
    ScaleHeight     =   4950
    ScaleWidth      =   10050
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CheckBox chkConsoleApp 
+      Caption         =   "Console App"
+      Height          =   315
+      Left            =   5760
+      TabIndex        =   20
+      Top             =   1380
+      Width           =   1335
+   End
    Begin VB.CheckBox chkDisplayAsHex 
       Caption         =   "ints as hex in dbg tooltips"
       Height          =   315
@@ -64,13 +72,13 @@ Begin VB.Form frmAddIn
       Width           =   6360
    End
    Begin VB.CheckBox chkClearImmediate 
-      Caption         =   "Clear Immediate Window On Start"
+      Caption         =   "Clear Immediate"
       Height          =   375
-      Left            =   4275
+      Left            =   4140
       TabIndex        =   14
-      Top             =   1305
+      Top             =   1320
       Visible         =   0   'False
-      Width           =   2715
+      Width           =   1455
    End
    Begin VB.CommandButton Command2 
       Caption         =   "Last CMD Output"
@@ -132,12 +140,12 @@ Begin VB.Form frmAddIn
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   3165
+      Height          =   3105
       Left            =   90
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   7
-      Top             =   1710
+      Top             =   1770
       Width           =   9870
    End
    Begin VB.Frame Frame1 
@@ -289,6 +297,11 @@ Attribute VB_Exposed = False
 Dim loaded As Boolean
 
 
+Private Sub chkConsoleApp_Click()
+    On Error Resume Next
+    VBInstance.ActiveVBProject.WriteProperty "fastBuild", "IsConsoleApp", chkConsoleApp.value
+End Sub
+
 Private Sub chkDisplayAsHex_Click()
         
     If Not loaded Then Exit Sub
@@ -385,6 +398,7 @@ Private Sub Form_Load()
     End If
         
     txtExecute = VBInstance.ActiveVBProject.ReadProperty("fastBuild", "ExecBtnCmdLine")
+    chkConsoleApp.value = CInt(VBInstance.ActiveVBProject.ReadProperty("fastBuild", "IsConsoleApp"))
     
     chkClearImmediate.value = ClearImmediateOnStart
     chkShowPostBuildOutput.value = ShowPostBuildOutput

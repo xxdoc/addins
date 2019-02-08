@@ -63,6 +63,8 @@ Public Declare Function GetCurrentProcessId Lib "kernel32" () As Long
 Private Declare Function GetOpenFileName Lib "comdlg32.dll" Alias "GetOpenFileNameA" (pOpenfilename As OPENFILENAME) As Long
 Private Declare Function GetModuleHandle Lib "kernel32" Alias "GetModuleHandleA" (ByVal lpModuleName As String) As Long
 Private Declare Function LoadLibrary Lib "kernel32" Alias "LoadLibraryA" (ByVal lpLibFileName As String) As Long
+Private Declare Function GetModuleFileName Lib "kernel32" Alias "GetModuleFileNameA" (ByVal hModule As Long, ByVal lpFileName As String, ByVal nSize As Long) As Long
+Private Declare Function GetShortPathName Lib "kernel32" Alias "GetShortPathNameA" (ByVal lpszLongPath As String, ByVal lpszShortPath As String, ByVal cchBuffer As Long) As Long
 
 Function LoadHexToolTipsDll() As Boolean
 
@@ -211,6 +213,60 @@ Function GetPostBuildCommand() As String
     On Error Resume Next
     If VBInstance.ActiveVBProject Is Nothing Then Exit Function
     GetPostBuildCommand = VBInstance.ActiveVBProject.ReadProperty("fastBuild", "PostBuild")
+End Function
+
+Function ConsoleAppCommand() As String
+    On Error Resume Next
+    Dim i As Long, exe As String
+    
+    If VBInstance.ActiveVBProject Is Nothing Then Exit Function
+    
+    i = CInt(VBInstance.ActiveVBProject.ReadProperty("fastBuild", "IsConsoleApp"))
+    
+    If i <> 0 Then
+        exe = GetVB6Path()
+        
+        If FileExists(exe & "\vblink.exe") Then
+            exe = exe & "\vblink.exe" 'if link tool addin is in use this is real vb linker
+        Else
+            exe = exe & "\link.exe"
+        End If
+        
+        If FileExists(exe) Then
+            exe = GetShortName(exe)
+            ConsoleAppCommand = exe & " /EDIT /SUBSYSTEM:CONSOLE %1"
+        End If
+    End If
+    
+End Function
+
+Public Function GetVB6Path() As String
+     Dim h As Long, ret As String
+     ret = Space(500)
+     h = GetModuleHandle("vb6.exe")
+     h = GetModuleFileName(h, ret, 500)
+     If h > 0 Then ret = Mid(ret, 1, h)
+     GetVB6Path = Replace(ret, "vb6.exe", Empty, , , vbTextCompare)
+End Function
+
+'file must exist for this to work which is stupid...
+Public Function GetShortName(sFile As String) As String
+    Dim sShortFile As String * 500
+    Dim lResult As Long
+    
+    'Make a call to the GetShortPathName API
+    lResult = GetShortPathName(sFile, sShortFile, Len(sShortFile))
+
+    'Trim out unused characters from the string.
+    GetShortName = Left$(sShortFile, lResult)
+    GetShortName = Replace(GetShortName, Chr(0), Empty)
+    
+    'if the api fails, we will revert to a quoted version of the full file name
+    '(maybe file doesnt exist, or buf to small)
+    If Len(GetShortName) = 0 Then
+        GetShortName = """" & sFile & """"
+    End If
+
 End Function
 
 Function IsIde() As Boolean

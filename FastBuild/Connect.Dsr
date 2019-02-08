@@ -365,16 +365,25 @@ Private Sub FileEvents_AfterWriteFile(ByVal VBProject As VBIDE.VBProject, ByVal 
         LastCommandOutput = GetCommandOutput("cmd /c " & postbuild, True, True)
     End If
     
+    postbuild = ConsoleAppCommand() 'do we have to change sub system? to console (also supports vblink.exe from linktool addin)
+    If Len(postbuild) > 0 Then
+        SetHomeDir
+        postbuild = ExpandVars(postbuild, FileName)
+        LastCommandOutput = LastCommandOutput & vbCrLf & GetCommandOutput("cmd /c " & postbuild, True, True)
+    End If
+    
     If ShowPostBuildOutput = 1 Then
+        'MsgBox LastCommandOutput
         buildOutput = GetFileReport(FileName)
         If Len(LastCommandOutput) > 0 Then
             buildOutput = buildOutput & vbCrLf & vbCrLf & "Post Build Command Output: " & vbCrLf & String(50, "-") & vbCrLf & LastCommandOutput
         End If
-        SetImmediateText buildOutput
+        SetImmediateText Replace(buildOutput, Chr(0), Empty)
     End If
     
     
 End Sub
+
 
 Private Sub FileEvents_DoGetNewFileName(ByVal VBProject As VBIDE.VBProject, ByVal FileType As VBIDE.vbext_FileType, NewName As String, ByVal OldName As String, CancelDefault As Boolean)
     Dim fastBuildPath As String
@@ -681,6 +690,7 @@ Sub ClearImmediateWindow()
     oWindow.SetFocus
 End Sub
 
+'doesnt work in win10? worked in XP
 Sub SetImmediateText(text As String)
     On Error Resume Next
     Dim oWindow As VBIDE.Window
@@ -699,6 +709,7 @@ Sub SetImmediateText(text As String)
    
     Clipboard.Clear
     If Len(saved) > 0 Then Clipboard.SetText saved
+    'MsgBox text
 End Sub
 
 
