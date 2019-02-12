@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>
+    </SchemaVersion>
+    <ProjectGuid>{A9E39A02-8029-447A-80AE-8307D159B74D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>BookmarkSave</RootNamespace>
+    <AssemblyName>BookmarkSave</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>Windows</MyType>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>BookmarkSave.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <RegisterForComInterop>true</RegisterForComInterop>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>BookmarkSave.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <RegisterForComInterop>true</RegisterForComInterop>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>Off</OptionStrict>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DocumentationFile>BookmarkSave.xml</DocumentationFile>
+    <RegisterForComInterop>true</RegisterForComInterop>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\CodeHelp.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.vb</CodeAnalysisModuleSuppressionsFile>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DocumentationFile>BookmarkSave.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>true</RegisterForComInterop>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>Full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\CodeHelp.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.vb</CodeAnalysisModuleSuppressionsFile>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <BaseAddress>23396352</BaseAddress>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Images\BookmarkSave-Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.Office" />
+    <Import Include="Microsoft.Office.Core" />
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Runtime.InteropServices" />
+    <Import Include="System.Runtime.Serialization" />
+    <Import Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AboutBoxControl.Designer.vb">
+      <DependentUpon>AboutBoxControl.vb</DependentUpon>
+    </Compile>
+    <Compile Include="AboutBoxControl.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AdditionalRegistration.vb" />
+    <Compile Include="Application.vb" />
+    <Compile Include="Bookmark.vb" />
+    <Compile Include="Breakpoint.vb" />
+    <Compile Include="Breakpoints.vb" />
+    <Compile Include="CodeLocation.vb" />
+    <Compile Include="Bookmarks.vb" />
+    <Compile Include="ConfigurationForm.Designer.vb">
+      <DependentUpon>ConfigurationForm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ConfigurationForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Connect.vb" />
+    <Compile Include="CustomExceptionExtensions.vb" />
+    <Compile Include="DLLExportAttribute.vb" />
+    <Compile Include="DllRegisterFunctions.vb" />
+    <Compile Include="ExceptionExtensions.Designer.vb">
+      <DependentUpon>ExceptionExtensions.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ExceptionExtensions.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmLogger.Designer.vb">
+      <DependentUpon>frmLogger.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmLogger.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmScreenShot.Designer.vb">
+      <DependentUpon>frmScreenShot.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmScreenShot.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HotKeySelector.Designer.vb">
+      <DependentUpon>HotKeySelector.vb</DependentUpon>
+    </Compile>
+    <Compile Include="HotKeySelector.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="KeyboardHook.vb" />
+    <Compile Include="LineMap.vb" />
+    <Compile Include="modExtensions.vb" />
+    <Compile Include="modLogger.vb" />
+    <Compile Include="modUtility.vb" />
+    <Compile Include="modWinAPI.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="OptionsControl.Designer.vb">
+      <DependentUpon>OptionsControl.vb</DependentUpon>
+    </Compile>
+    <Compile Include="OptionsControl.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ScreenCapture.vb" />
+    <Compile Include="Subclasser.vb" />
+    <Compile Include="WindowInterceptor.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AboutBoxControl.resx">
+      <DependentUpon>AboutBoxControl.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConfigurationForm.resx">
+      <DependentUpon>ConfigurationForm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ExceptionExtensions.resx">
+      <DependentUpon>ExceptionExtensions.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmLogger.resx">
+      <DependentUpon>frmLogger.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmScreenShot.resx">
+      <DependentUpon>frmScreenShot.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OptionsControl.resx">
+      <DependentUpon>OptionsControl.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="Registration.reg" />
+    <None Include="VB6EXT.OLB" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Office.dll" />
+    <EmbeddedResource Include="Images\BookmarkSave-Icon.png" />
+    <Content Include="Notes.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\BookmarkSave-Icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Core">
+      <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>5</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <Private>False</Private>
+    </COMReference>
+    <COMReference Include="VBIDE">
+      <Guid>{EF404E00-EDA6-101A-8DAF-00DD010F7EBB}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>3</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Target Name="AfterBuild" DependsOnTargets="GenerateLineMap" />
+  <PropertyGroup>
+    <!-- This assumes these exe utilities are on the path -->
+    <GenLineMapExe>"GenerateLineMap.exe"</GenLineMapExe>
+    <LineMappedAssembly>@(MainAssembly -> '%(RelativeDir)%(Filename).GenLineMapTrigger%(Extension)')</LineMappedAssembly>
+    <DLLExportExe>"DLLExport.exe"</DLLExportExe>
+    <DLLExportAssembly>@(MainAssembly -> '%(RelativeDir)%(Filename).DLLExportTrigger%(Extension)')</DLLExportAssembly>
+  </PropertyGroup>
+  <Target Name="GenerateLineMap" DependsOnTargets="DLLExport" Inputs="$(DLLExportAssembly" Outputs="$(LineMappedAssembly)">
+    <Message Text="Generating Line Map" Importance="High" />
+    <Exec Command="$(GenLineMapExe) /out:&quot;@(MainAssembly)&quot; &quot;$(DLLExportAssembly)&quot; " />
+    <!-- Make a copy of the LineMapped output to use as a trigger for incremental builds -->
+    <Copy SourceFiles="@(MainAssembly)" DestinationFiles="$(LineMappedAssembly)" />
+  </Target>
+  <Target Name="DLLExport" Inputs="@(IntermediateAssembly)" Outputs="$(DLLExportAssembly)">
+    <Message Text="DLLExport" Importance="High" />
+    <Exec Command="$(DLLExportExe) /$(ConfigurationName) /verbose /input:&quot;@(IntermediateAssembly)&quot; /output:&quot;@(MainAssembly)&quot;" />
+    <!-- Make a copy of the "Exported" output to use as a trigger for incremental builds -->
+    <Copy SourceFiles="@(MainAssembly)" DestinationFiles="$(DLLExportAssembly)" />
+  </Target>
+</Project>

@@ -68,7 +68,7 @@ Private Sub AddinInstance_OnConnection(ByVal Application As Object, ByVal Connec
 10            Set MenuHandler2 = g_VBInstance.Events.CommandBarEvents(mcbMenuCommandBar2)
          End If
     
-4        Set ComponentHandler = g_VBInstance.Events.VBComponentsEvents(Nothing)
+4        Set ComponentHandler = g_VBInstance.Events.VBComponentsEvents(g_VBInstance.ActiveVBProject) ' Nothing)
 6        Set wToolCodeView = g_VBInstance.Windows.CreateToolWindow(AddInInst, "CodeView.ToolCodeView", "CodeView", GuidCodeView, mToolCodeView)
 11       Me.Show
 
@@ -91,7 +91,7 @@ Private Sub AddinInstance_OnDisconnection(ByVal RemoveMode As AddInDesignerObjec
 '    End If
     
 1    If Not mcbMenuCommandBar2 Is Nothing Then
-2        mcbMenuCommandBar2.Delete
+2        TryDelete mcbMenuCommandBar2
 3        Set mcbMenuCommandBar2 = Nothing
 4        If Not MenuHandler2 Is Nothing Then Set MenuHandler2 = Nothing
     End If
@@ -108,8 +108,13 @@ Private Sub AddinInstance_OnDisconnection(ByVal RemoveMode As AddInDesignerObjec
     Exit Sub
     
 hell:
-    MsgBox "CodeView.AddinInstance_OnDisconnection " & Err.Description
+    MsgBox "CodeView.AddinInstance_OnDisconnection " & Err.Description & " Line: " & Erl
 
+End Sub
+
+Private Sub TryDelete(o As Object)
+    On Error Resume Next
+    o.Delete
 End Sub
 
 Private Sub IDTExtensibility_OnStartupComplete(custom() As Variant)

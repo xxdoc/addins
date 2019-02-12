@@ -1,0 +1,19 @@
+[
+  {
+    "Id": "0",
+    "Name": "BookmarkSave 1.0.0.6",
+    "DevelopmentStatus": "Stable",
+    "Description": "Initial Release",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2012-06-14T20:37:27.91-07:00",
+    "Files": [
+      {
+        "Id": "0a99aaf5-82e1-4a34-919c-f7f48bc0afbd",
+        "FileName": "BookmarkSave.zip",
+        "Url": "./0/0a99aaf5-82e1-4a34-919c-f7f48bc0afbd",
+        "Type": "Application",
+        "UploadDate": "2012-06-14T20:37:27.863-07:00"
+      }
+    ]
+  }
+]

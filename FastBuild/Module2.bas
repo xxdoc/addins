@@ -184,6 +184,7 @@ Function ExpandVars(ByVal cmd As String, exeFullPath As String) As String
     
     ExpandVars = Replace(cmd, "%1", exeFullPath)
     ExpandVars = Replace(ExpandVars, "%app", appDir, , , vbTextCompare)
+    ExpandVars = Replace(ExpandVars, "%ap%", appDir, , , vbTextCompare)
     ExpandVars = Replace(ExpandVars, "%fname", fName, , , vbTextCompare)
     
 End Function
