@@ -14,6 +14,7 @@ Class=CReg; CReg.cls
 Form=frmAddRefs.frm
 Form=frmIPC.frm
 ResFile32="MyAddIn.RES"
+Module=Module1; Module1.bas
 Startup="(None)"
 HelpFile=""
 Title="MyAddIn"

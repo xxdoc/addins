@@ -771,7 +771,7 @@ Sub ClearImmediateWindow()
     Dim oWindow As VBIDE.Window
     Set oWindow = VBInstance.ActiveWindow
     VBInstance.Windows("Immediate").SetFocus
-    SendKeys "^{Home}", True
+    SendKeys "^{Home}", True     'win10 permission denied
     SendKeys "^+{End}", True
     SendKeys "{Del}", True
     oWindow.SetFocus
