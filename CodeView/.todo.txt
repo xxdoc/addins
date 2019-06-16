@@ -1,4 +1,6 @@
 
+- when a form is closed treeview goes stale until user clicks on next open code window
+
 - for const mouse over tool tip shows value in tv?
 
 - Find All menu item:

@@ -1,0 +1,48 @@
+﻿Bookmark Save Addin for VB6
+By Darin Higgins
+
+
+Includes various code elements from around the web, all annotations left intact.
+
+
+Written in VB.net, using the .net 4.0 framework.
+
+Notable features:
+
+ * Can be registered with plain 'ol REGSVR32, just like any other COM addin
+
+ * Always save bookmarks and breakpoints
+
+ * automatically saves bookmarks and breakpoints when they're changed.
+
+ * Adds hotkeys for
+      1) Toggling bookmarks (Ctrl-k)
+      2) Next Bookmark (Alt-Right)
+      3) Prev Bookmark (Alt-Left)
+
+ * Attempts to detect and preserve breakpoints, no matter how they're set:
+      1) via menus
+      2) via right click menus
+      3) via f9 hotkey
+      4) via click in code edit window margin
+
+ * Makes use of my GenerateLineMap utility for embedding line number information 
+   directly into the DLL
+
+ * Makes use of ExportDLL utility to Automatically export standard DLL registration
+   entry points
+
+
+Caveats:
+
+ * Since VB doesn't actually expose any functionality for tracking bookmarks or breakpoints
+   keeping things synchronized between what VB knows to exist and what the addin tracks is
+   tricky at best. For the most part, the addin tracks things very well, but it IS possible
+   for the addin to loose track of a bookmark or breakpoint. When this happens, the only real
+   effect is that if you close the project and then reopen it, you might get a bookmark or 
+   breakpoint either not restored, or restored to a slightly different location.
+
+ * Also note that since the tracking process relies on the use of the VB IDE, if you edit
+   source code in any other editor after bookmarks or breakpoints have been set, when you load
+   the code back into the VB IDE, the bookmarks or breakpoints may be restored to the wrong 
+   locations.
