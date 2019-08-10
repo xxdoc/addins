@@ -782,20 +782,26 @@ Sub SetImmediateText(text As String)
     On Error Resume Next
     Dim oWindow As VBIDE.Window
     Dim saved As String
+    Dim s As Date
     
     If Len(text) = 0 Then Exit Sub
     
     ClearImmediateWindow
-    saved = Clipboard.GetText
+    'saved = Clipboard.GetText
     Clipboard.Clear
     Clipboard.SetText text
+    'MsgBox "saved: " & Clipboard.GetText
     
     Set oWindow = VBInstance.ActiveWindow
     VBInstance.Windows("Immediate").SetFocus
-    SendKeys "^v", True
+    SendKeys "^v", False 'True
    
-    Clipboard.Clear
-    If Len(saved) > 0 Then Clipboard.SetText saved
+    's = Now apparently win10 has some timing issues..we cant restore the old clipboard not gonna fight with it..
+    'While DateDiff("s", s, Now) < 2
+    '    DoEvents
+    'Wend
+    'Clipboard.Clear
+    'If Len(saved) > 0 Then Clipboard.SetText saved
     'MsgBox text
 End Sub
 

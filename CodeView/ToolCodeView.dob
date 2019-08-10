@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
 Begin VB.UserDocument ToolCodeView 
    ClientHeight    =   3750
    ClientLeft      =   0
@@ -512,6 +512,15 @@ Sub Reload(Optional NewModule As CodeModule)
     Nodes(vbext_mt_Property).Sorted = True
     Nodes(vbext_mt_Method).Sorted = True
     Nodes(vbext_mt_Event).Sorted = True
+    
+    If Len(txtFilter) > 0 Then
+        Nodes(vbext_mt_Const).Expanded = True
+        Nodes(vbext_mt_Variable).Expanded = True
+        Nodes(vbext_mt_Property).Expanded = True
+        Nodes(vbext_mt_Method).Expanded = True
+        Nodes(vbext_mt_Event).Expanded = True
+    End If
+    
     Unfreeze CodeView.hwnd
     
 End Sub

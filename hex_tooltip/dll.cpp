@@ -47,12 +47,14 @@ void InstallHooks(void);
 
 bool Installed =false;
 bool SubclassActive = false;
+const bool dbgMsg = false;    //so on windows 10 there is a delay on WM_PAINT message had to remove sc active flag
+
 char* newText = NULL;
 WNDPROC OldWndProc = NULL;
 int WindowWidth = 0;
 HWND hookedHWND = 0;   //tooltips use the same HWND for every run and every difference code editor window..we only have to hook once..
 HFONT hFont;
-const bool dbgMsg = false;
+
 #define ERROR_NO_KEY      0x11223344
 char my_regKey[200] = "Software\\VB and VBA Program Settings\\FastBuild\\Settings";
 
@@ -90,34 +92,45 @@ int getStringWidth(char *text, HFONT font) {
     return textWidth;
 }
 
-LRESULT APIENTRY NewWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
+void doPaint(HWND hwnd){
+	 
 	PAINTSTRUCT ps;
 	HDC hdc;
     RECT rc;
+     
+	 int txtLen = strlen(newText);
 
-	if(SubclassActive && newText != NULL){
-		int txtLen = strlen(newText);
+	 hdc = BeginPaint(hwnd,&ps);
+	 if(dbgMsg) LogAPI("int wm_paint subclass");
+
+	 SetBkColor(hdc, RGB(255,255,0xe1));
+	 SetTextColor(hdc, RGB(0,0,0));
+	 SelectObject(hdc,hFont);
+	 TextOut(hdc,0,0, newText, txtLen);
+	 //TextOut(hdc,0,0, "fart", 4);
+
+	 GetWindowRect(hwnd,&rc);
+	 HBRUSH brush = CreateSolidBrush(RGB(255,255,0xe1));
+	 if(brush!=NULL){
+		 /*if(dbgMsg)*/ LogAPI("did custom draw!");
+		 FillRect(hdc, &rc, brush);
+		 DeleteObject(brush);
+	 }
+
+	 EndPaint(hwnd,&ps); 
+}
+
+LRESULT APIENTRY NewWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	
+	//if(uMsg==WM_PAINT) LogAPI("WM_PAINT", uMsg);
+
+	if(/*SubclassActive &&*/ newText != NULL){
+		if(dbgMsg) LogAPI("in subclass msg=%x", uMsg);
 		switch (uMsg)
 		{
 			case WM_PAINT:
-
-				 hdc = BeginPaint(hwnd,&ps);
-
-				 SetBkColor(hdc, RGB(255,255,0xe1));
-				 SetTextColor(hdc, RGB(0,0,0));
-				 SelectObject(hdc,hFont);
-				 TextOut(hdc,0,0, newText, txtLen);
-
- 				 GetWindowRect(hwnd,&rc);
-				 HBRUSH brush = CreateSolidBrush(RGB(255,255,0xe1));
-				 if(brush!=NULL){
-					 FillRect(hdc, &rc, brush);
-					 DeleteObject(brush);
-				 }
-
-				 EndPaint(hwnd,&ps);  
-				
+				 doPaint(hwnd);
 				 return 0;
 		}
 	}
@@ -186,9 +199,15 @@ void resizeToolTip(HWND hwnd){
 	 if(newText == NULL) return;
 	 GetWindowRect(hwnd, &rc);
 	 int width = getStringWidth(newText, hFont); //rc.left - rc.right + 500;  
-	 int height = rc.bottom - rc.top;
-	 Real_SetWindowPos(hwnd, NULL,  rc.left, rc.top, width, height, SWP_SHOWWINDOW);
-	 //SendMessage(hWnd, TTM_ADJUSTRECT, TRUE, (LPARAM)&rc); 			  
+	 int height = rc.bottom - rc.top-4;
+	 //win 10 wont fucking redraw the tooltip no matter what...
+	 /*SetWindowText(hwnd,newText);
+	 doPaint(hwnd);
+	 RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	 InvalidateRect(hwnd, &rc, TRUE);
+	 UpdateWindow(hwnd);*/
+	 //SendMessage(hWnd, TTM_ADJUSTRECT, TRUE, (LPARAM)&rc); 
+	 Real_SetWindowPos(hwnd, NULL,  rc.left, rc.top, width, height, SWP_SHOWWINDOW);			  
 }
 
 int ReadRegInt(char* baseKey, char* name){
@@ -218,9 +237,9 @@ BOOL __stdcall My_SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int  X, int  Y, 
 		int v = ReadRegInt(my_regKey, "DisplayAsHex");
 
 		if(v==0){
-			if(dbgMsg) LogAPI("%x  SetWindowPos Hook Disabled h=%x   flags=%x", CalledFrom(), hWnd, uFlags);
+			//if(dbgMsg) LogAPI("%x  SetWindowPos Hook Disabled h=%x   flags=%x", CalledFrom(), hWnd, uFlags);
 		}else{ 
-			if(v == ERROR_NO_KEY && dbgMsg) LogAPI("SetWindowPos Hook no reg key set continuing...");
+			//if(v == ERROR_NO_KEY && dbgMsg) LogAPI("SetWindowPos Hook no reg key set continuing...");
 
 			char *caption = windowText(hWnd); //always returns a malloced buf to free
 			
@@ -233,14 +252,14 @@ BOOL __stdcall My_SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int  X, int  Y, 
 				return rv;
 			}
 			else{
-				if(dbgMsg) LogAPI("%x  No modify ToolTip.SetWindowPos h=%x   flags=%x   %s", CalledFrom(), hWnd, uFlags, caption);
+				//if(dbgMsg) LogAPI("%x  No modify ToolTip.SetWindowPos h=%x   flags=%x   %s", CalledFrom(), hWnd, uFlags, caption);
 				free(caption);
 			}
 		}
 
 		
 	}else{
-		if(dbgMsg) LogAPI("%x  SetWindowPos h=%x flags=%x  class= %s (x=%d,y=%d,cx=%d,cy=%d)", CalledFrom(), hWnd, uFlags, buf, X,Y,cx,cy);
+		//if(dbgMsg) LogAPI("%x  SetWindowPos h=%x flags=%x  class= %s (x=%d,y=%d,cx=%d,cy=%d)", CalledFrom(), hWnd, uFlags, buf, X,Y,cx,cy);
 	}
 
 	
