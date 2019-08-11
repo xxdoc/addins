@@ -1,0 +1,180 @@
+
+Callers Add-in [Update 3.7 - Jan 29, 2018]
+
+ DETAILS:
+ This is a quite simple VB add-in that adds something I've
+ sometimes needed as projects get too large and complex.
+ It adds a couple of entries to VB's code pane context menu
+ so that when you right-click within a procedure (or on a
+ declare) and select 'Callers' you get a popup menu listing
+ all other routines in the project that call this code member.
+ It displays which routines reference any particular code member
+ in the project, and allows you to select one to go to it - and
+ a second entry called 'Callee' to go back if you wish.
+
+ FEATURES:
+ Callee's include all procedures, API declares, Enums and Types,
+ module level constants and variables, Implemented classes and
+ Raised Events. Also identifies parent Type or Enum when right-
+ clicking on one of their members. Finds public Enums of classes
+ without being qualified by class name. Also adds a 'Clear' menu
+ item to the Immediate Window.
+
+ UPDATE 1.5: jumps to the line within the Caller at the first
+ reference to the Callee (instead of the start of the Caller
+ procedure). Added API declares, constants and module level
+ variables as Callee's.
+
+ UPDATE 1.6: fixed bugs introduced in 1.5.
+ UPDATE 1.7: added Raised Events, Enums and Types as Callee's.
+ UPDATE 1.8: fixed VBE Find func allowing underscores as matches
+ (Hwnd no longer matches m_Hwnd) but still allows event procedures
+ to match (ISearch matches ISearch_FoundItem).
+
+ UPDATE 1.9: Serious bug fix. Fixed some matches being missed in
+ the declarations section.
+
+ UPDATE 2.0: Identifies parent Type or Enum when clicking
+ on one of the members. Now finds public Enums of classes
+ without being qualified by class name (eObjType or
+ clsObjs.eObjType) used anywhere within the current project.
+
+ UPDATE 2.1: With blocks sometimes had false matches so needed
+ a fix. Also fixed a minor bug that identified the wrong member
+ when you right-click a comment line in the declarations section.
+
+ UPDATE 2.21: fixed fatal typo bug introduced in v2.2.
+
+ UPDATE 2.22: fixed 'exclude addin designer' introduced in v1.9.
+
+ UPDATE 2.23: fixed 'underscore' incorrect behavior introduced
+ in v1.8 (Initialize matched Class_Initialize) - thanks heaps
+ to Kenneth Ives (kenaso) for your feedback.
+
+ UPDATE 2.24: fixed yet another bug - discovered the VBE Find
+ function searches up to but not including the specified last
+ line. Also now correctly handles API declares with line
+ continuation.
+
+ UPDATE 2.25: found a minor bug that missed callers when the class
+ is declared as an array. I knew of another minor bug so having
+ two bugs I worked out a fix for them and here is the update.
+ New bug: cMany() As cObj
+          cMany(i).GetIt(...)
+ would miss callers of the GetIt method of the cObj class.
+ Old bug: ActiveForm.Add(...)
+ would miss callers of the Add method of an MDI child form.
+
+ UPDATE 2.26: fixed a minor bug that missed a caller when the
+ member in question was an Implemented procedure of a public
+ class. E.g: FoundItem would miss frmMain.ISearch_FoundItem.
+ Re-introduced incorrect Initialize matches Glaze_Initialize
+ fixed in 2.23, but only IfItIs_Initialize in the same module
+ (unlikely). Prefer a false hit rather than many missed hits.
+
+ UPDATE 2.3: fixed a minor bug that missed a caller when the
+ member in question was referenced as the data type of one of
+ a procedures arguments. I use this add-in all the time so when
+ I got a missed hit it 'bugged' me so I just had to fix it.
+
+ UPDATE 2.4: Added a 'Reset Standard ToolBar' entry.
+
+ UPDATE 2.5: Removed 2.4, decided it was a bad idea. I have 2.4
+ now as separate Addin (probably useful only to me), available by
+ request only if you REALLY NEED IT at rohanedwards123*gmail*com.
+ WARNING: Reported that it can screw up ur IDE!
+
+ UPDATE 2.6:
+ Fixed minor glitch where receiver of Implemented events was not
+ identifying where events were fired from. Now the Implemented
+ class links both caller and callee, not identified as a caller
+ of the callee itself, but passing on its callers, the initiators
+ of the events, as callers.
+
+ UPDATE 2.7:
+ Added by request display all members of the current code module.
+ Pretty raw first draft, popup list is basic, just got it working
+ basically. Let me know if the code pane context menu doesn't
+ seem correct. Worked harder setting that up than the new feature.
+
+ UPDATE 2.8:
+ Fixed a minor bug introduced in 2.6. Now it will return to callee
+ when jumped to caller via Implemented class, instead of returning
+ to the definition in the Implemented class (redirected both ways).
+
+ UPDATE 2.9:
+ Refined the new feature added in 2.7, cleaned up pop-up menus? and
+ fixed minor bugs to get it behaving correctly. Added enums and
+ types which are not included in the VBE's members collection by
+ parsing for them in the declarations section.
+
+ UPDATE 3.0:
+ Removed component reference in menu items when listing all members
+ of the current component, as they all have the same parent anyway,
+ and the callee also shares the same reference (the callee returns
+ to the popup position), so they default to the callee reference
+ when they don't have their own. Added fuctionality to identify
+ the callers of a WithEvents event, the initiators of the events.
+ Used the same redirection technique as for Implemented events.
+
+ UPDATE 3.1:
+ Fixed bug introduced 2.7: Menu memory errors around 250 items!
+ Hadn't anticipated limit listing all members on large projects.
+
+ UPDATE 3.1(b):
+ Added missing RES file.
+
+ UPDATE 3.2:
+ Version 3.0 added WithEvents event procedures recognising the
+ initiators of the events, via the WithEvents class variable.
+ Now WithEvents class variables identify the WithEvents event
+ procedures as callers of the variable.
+
+ Added HotKeys:
+
+         Display Callers..      Alt+F2
+         Return to Callee   Alt+Win+F2
+
+ UPDATE 3.3:
+ Fixed a bug where more than one instance of a class declared
+ within the same module would only find callers of the first
+ found instance.
+
+ UPDATE 3.4:
+ Fixed bug in 3.3!
+
+ UPDATE 3.5:
+ Added another HotKey:
+
+         Jump to next Caller..  Alt+F3
+
+ Pop-up menu is limited to 200 entries, but all hits are kept
+ and can be iterated by stepping thru the code with the new
+ HotKey.
+
+ You can hit Alt+F2, then dismiss the menu with Alt(again)+F3,
+ and step thru all hits with Alt+F3. You must try it!
+
+ UPDATE 3.6:
+
+ Minor update allows returning to all Callees - I'm often finding
+ Callers of Callers and then unable to return to the starting Callee.
+
+ Previous Callees will eventually become out of sync as changes are
+ made to the code, but no errors will occur.
+
+ Also available by repeating the Alt+Win+F2 HotKey.
+
+ UPDATE 3.7:
+
+ Another minor update allows stepping through Callers in reverse.
+ Available only by repeating the Alt+Win+F3 HotKey.
+
+ Bug reports or suggestions for improvement welcome:
+ rohanedwards123*gmail*com
+
+ Just compile the project to automatically add the add-in to VB
+ and get two new menu items 'Callers' and 'Callee' on the code
+ context menu ... If you have compiled a previous version just
+ compile again with no VB IDE's open by selecting 'Make' on the
+ Caller.vbp's right-click context menu in explorer ... 22 kb zip.
