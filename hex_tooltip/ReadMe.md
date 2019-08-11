@@ -1,4 +1,11 @@
 <pre>
+Note: Stable on XP, WM_PAINT never being called on Win10 subclassed tooltip window? 
+      maybe change tact to show another window next to tooltip of our own? use external
+      exe version from dllhell for now on win10
+      
+      also this has been integrated into the fastbuild addin as a persistant checkbox option
+      to load the dll. perfect for xp
+      
 Experimental
 
 inject this into vb6 ide to have numeric tool tips values display hex along side decimal value.

@@ -133,7 +133,7 @@ Public Sub SendKeys(Data As String, Optional Wait As Boolean)
       For i = 0 To m_EvtPtr - 1
          With m_Events(i)
             .dwType = INPUT_KEYBOARD
-            Debug.Print .wVK, .dwFlags
+            'Debug.Print .wVK, .dwFlags
          End With
       Next i
       ' m_EvtPtr is 0-based, but nInputs is 1-based.
