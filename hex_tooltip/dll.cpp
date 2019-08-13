@@ -125,12 +125,13 @@ LRESULT APIENTRY NewWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	
 	//if(uMsg==WM_PAINT) LogAPI("WM_PAINT", uMsg);
 
-	if(/*SubclassActive &&*/ newText != NULL){
+	if(SubclassActive &&  newText != NULL){
 		if(dbgMsg) LogAPI("in subclass msg=%x", uMsg);
 		switch (uMsg)
 		{
 			case WM_PAINT:
 				 doPaint(hwnd);
+				 SubclassActive = false;
 				 return 0;
 		}
 	}
@@ -152,7 +153,7 @@ int AppendHexIfOk(HWND h, char* curCaption){
 		c = curCaption[i];
 		if(c == '='){ equalPos = i; continue; /*jump to next i*/}
 		if(equalPos > 0){
-			if(c==' ' || isdigit(c)){ /*ok*/ } else return 0; //only accept spaces and numbers for this mod..
+			if(c==' ' || isdigit(c) || c == '-'){ /*ok*/ } else return 0; //only accept spaces and numbers for this mod..
 		}
 	}
 
@@ -229,7 +230,7 @@ BOOL __stdcall My_SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int  X, int  Y, 
 	BOOL rv;
 	char buf[500] = {0};
 	
-	SubclassActive = false;
+	//SubclassActive = false;
 	int sz = GetClassName(hWnd, buf, sizeof(buf));
 	
 	if(sz!=0 && strcmp(buf,"tooltips_class32") == 0 && (uFlags & SWP_SHOWWINDOW) == SWP_SHOWWINDOW){
