@@ -11,6 +11,16 @@ Begin VB.Form frmFindAll
    ScaleHeight     =   3765
    ScaleWidth      =   11190
    StartUpPosition =   2  'CenterScreen
+   Begin VB.TextBox txtIPC 
+      BackColor       =   &H0000FFFF&
+      Height          =   285
+      Left            =   4005
+      TabIndex        =   7
+      Text            =   "txtIPC"
+      Top             =   630
+      Visible         =   0   'False
+      Width           =   1455
+   End
    Begin CodeView.HistoryCombo txtFind 
       Height          =   315
       Left            =   1125
@@ -160,6 +170,9 @@ Begin VB.Form frmFindAll
       Caption         =   "mnuPopup"
       Begin VB.Menu mnuCopyAll 
          Caption         =   "Copy All"
+      End
+      Begin VB.Menu mnuSearchList 
+         Caption         =   "Search List"
       End
    End
 End
@@ -491,11 +504,16 @@ Private Sub cmdSearch_Click()
 End Sub
 
 Private Sub Form_Load()
+    On Error Resume Next
+    'MsgBox "form search all load ok"
+    txtIPC = Empty
     mnuPopup.Visible = False
     FormPos Me, True
     SetWindowTopMost Me
     historyFile = g_VBInstance.ActiveVBProject.filename & ".search.txt"
     txtFind.LoadHistory historyFile
+    SaveSetting "codeview", "ipc", "txtIPC", txtIPC.hwnd 'so we can trigger searches from remote tools like a list of things..
+    'MsgBox "form search all load ok"
 End Sub
 
 Private Sub Form_Resize()
@@ -510,6 +528,7 @@ End Sub
 Private Sub Form_Unload(Cancel As Integer)
     FormPos Me, True, True
     txtFind.SaveHistory
+    SaveSetting "codeview", "ipc", "txtIPC", 0
 End Sub
 
 Private Sub Label1_Click()
@@ -576,6 +595,16 @@ Private Sub mnuCopyAll_Click()
     Clipboard.SetText Join(x, vbCrLf)
 End Sub
 
+Private Sub mnuSearchList_Click()
+    On Error Resume Next
+    Dim p As String
+    p = App.path & "\searchList\searchList.exe"
+    Shell p, vbNormalFocus
+    If Err.Number <> 0 Then
+        MsgBox Err.Description & vbCrLf & p
+    End If
+End Sub
+
 Private Sub txtFind_KeyPress(KeyCode As Integer)
   On Error Resume Next
   
@@ -609,3 +638,11 @@ Sub FormPos(fform As Form, Optional andSize As Boolean = False, Optional save_mo
     
 End Sub
 
+Private Sub txtIPC_Change()
+    On Error Resume Next
+    If Len(txtIPC.Text) = 0 Then Exit Sub
+    txtFind.Text = txtIPC.Text
+    cmdSearch_Click
+    txtIPC.Text = Empty
+    lv_ItemClick lv.ListItems(1)
+End Sub

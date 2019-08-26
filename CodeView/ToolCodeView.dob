@@ -472,7 +472,12 @@ Sub Reload(Optional NewModule As CodeModule)
         'If Len(protoType) = 0 Then Stop
 
         If Len(txtFilter) > 0 Then
-            If VBA.Left(txtFilter, 1) = "-" And Len(txtFilter) > 1 Then   'subtractive filter like -mnu,cmd,lv
+            If VBA.Left(txtFilter, 1) = "*" Then 'public members only
+                If Not (mber.scope = vbext_Private) Then
+                    Set nn = CodeView.Nodes.Add(Nodes(e.mType), tvwChild, , NodeName, e.mType + i)
+                    Set nn.Tag = e
+                End If
+            ElseIf VBA.Left(txtFilter, 1) = "-" And Len(txtFilter) > 1 Then   'subtractive filter like -mnu,cmd,lv
                 Dim tmp() As String, addit As Boolean, x
                 addit = True
                 If InStr(txtFilter, ",") Then tmp = Split(Mid(txtFilter, 2), ",") Else tmp = Split(Mid(txtFilter, 2), " ")
@@ -703,6 +708,14 @@ Private Sub txtFilter_Change()
     If VBA.Left(txtFilter, 1) = "-" Then 'they are typing a subtractive filter..give them time to formulate it..
         If Len(txtFilter) = 1 Then Exit Sub
         If VBA.Right(txtFilter, 1) = "," Or VBA.Right(txtFilter, 1) = " " Then Exit Sub
+    End If
+    
+    If Len(txtFilter) = 0 Then
+        Nodes(vbext_mt_Const).Expanded = False
+        Nodes(vbext_mt_Variable).Expanded = False
+        Nodes(vbext_mt_Event).Expanded = False
+        Nodes(vbext_mt_Property).Expanded = False
+        Nodes(vbext_mt_Method).Expanded = True
     End If
     
     filterChanged = True
