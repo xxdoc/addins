@@ -43,6 +43,14 @@ Begin VB.Form Form1
       Top             =   495
       Visible         =   0   'False
       Width           =   9420
+      Begin VB.CheckBox chkScriptEnabled 
+         Caption         =   "Enable"
+         Height          =   285
+         Left            =   135
+         TabIndex        =   14
+         Top             =   315
+         Width           =   1140
+      End
       Begin MSScriptControlCtl.ScriptControl sc 
          Left            =   5940
          Top             =   135
@@ -72,9 +80,9 @@ Begin VB.Form Form1
       Begin VB.CommandButton Command2 
          Caption         =   "def"
          Height          =   330
-         Left            =   135
+         Left            =   720
          TabIndex        =   9
-         Top             =   315
+         Top             =   3015
          Width           =   510
       End
       Begin VB.ListBox List1 
@@ -103,9 +111,9 @@ Begin VB.Form Form1
       Begin VB.CommandButton Command3 
          Caption         =   "?"
          Height          =   330
-         Left            =   135
+         Left            =   90
          TabIndex        =   5
-         Top             =   675
+         Top             =   3015
          Width           =   600
       End
       Begin VB.Label Label3 
@@ -236,6 +244,7 @@ End Sub
 Private Sub Form_Load()
     lv.SetColumnHeaders "Text"
     lv.AllowDelete = True
+    lv.MultiSelect = True
     lv.SetFont "Courier", 12
     defScr = Text1
     p = App.Path & "\lastScript.txt"
@@ -262,7 +271,11 @@ Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
     On Error Resume Next
     List1.Clear
     copyAfter = Empty
-    x = process(Item.Text)
+    If chkScriptEnabled.value Then
+        x = process(Item.Text)
+    Else
+        x = Item.Text
+    End If
     SendIPCCommand CStr(x)
     If Err.Number <> 0 Then List1.AddItem Err.Description
 End Sub

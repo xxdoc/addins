@@ -26,10 +26,28 @@ Begin VB.UserDocument ToolCodeView
       Width           =   2085
       Begin VB.TextBox txtFilter 
          Height          =   285
-         Left            =   450
+         Left            =   630
          TabIndex        =   2
          Top             =   0
-         Width           =   1500
+         Width           =   1320
+      End
+      Begin VB.Label lblHelp 
+         Caption         =   "?"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   -1  'True
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H00FF0000&
+         Height          =   240
+         Left            =   45
+         TabIndex        =   5
+         Top             =   45
+         Width           =   150
       End
       Begin VB.Label lblFilter 
          Caption         =   "Filter:"
@@ -44,7 +62,7 @@ Begin VB.UserDocument ToolCodeView
          EndProperty
          ForeColor       =   &H00FF0000&
          Height          =   240
-         Left            =   0
+         Left            =   180
          TabIndex        =   3
          Top             =   45
          Width           =   420
@@ -185,7 +203,7 @@ Begin VB.UserDocument ToolCodeView
          Caption         =   "Show Line Count"
       End
       Begin VB.Menu mnuCopyPublic 
-         Caption         =   "Copy Public"
+         Caption         =   "Save Public"
       End
    End
 End
@@ -214,6 +232,32 @@ Private curEntry As CEntry
 
 Const DEBUGMODE = False
 
+Private Declare Function GetSaveFileName Lib "comdlg32.dll" Alias "GetSaveFileNameA" (pOpenfilename As OPENFILENAME) As Long
+Private Declare Function GetForegroundWindow Lib "user32" () As Long
+
+Private Type OPENFILENAME
+    lStructSize As Long
+    hWndOwner As Long
+    hInstance As Long
+    lpstrFilter As String
+    lpstrCustomFilter As String
+    nMaxCustFilter As Long
+    nFilterIndex As Long
+    lpstrFile As String
+    nMaxFile As Long
+    lpstrFileTitle As String
+    nMaxFileTitle As Long
+    lpstrInitialDir As String
+    lpstrTitle As String
+    flags As Long
+    nFileOffset As Integer
+    nFileExtension As Integer
+    lpstrDefExt As String
+    lCustData As Long
+    lpfnHook As Long
+    lpTemplateName As String
+End Type
+
 Public Sub DBG(msg As String)
     If DEBUGMODE Then lstDbg.AddItem msg & " " & Format(Now, "h:m:ss")
 End Sub
@@ -225,6 +269,8 @@ Private Sub CodeView_DblClick()
     If curEntry Is Nothing Then Exit Sub
     
     If Not CodeView.SelectedItem Is Nothing Then
+        'MsgBox curEntry.loc
+        
         ActiveCodeModule.parent.Activate
         ActiveCodeModule.CodePane.SetSelection curEntry.loc, 1, curEntry.loc, 1
         ActiveCodeModule.CodePane.Window.SetFocus
@@ -240,11 +286,11 @@ Private Sub CodeView_KeyDown(KeyCode As Integer, Shift As Integer)
     End If
 End Sub
 
-Private Sub CodeView_Mouseup(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub CodeView_Mouseup(Button As Integer, Shift As Integer, x As Single, Y As Single)
     On Error Resume Next
-    If Not CodeView.SelectedItem Is Nothing Then
-        mnuCopyPublic.Visible = (CodeView.SelectedItem.Text = "Functions")
-    End If
+    'If Not CodeView.SelectedItem Is Nothing Then
+    '    mnuCopyPublic.Visible = (CodeView.SelectedItem.Text = "Functions")
+    'End If
     If Button = vbRightButton Then PopupMenu mnuPopup
 End Sub
 
@@ -470,42 +516,46 @@ Sub Reload(Optional NewModule As CodeModule)
         End If
         
         'If Len(protoType) = 0 Then Stop
-
-        If Len(txtFilter) > 0 Then
-            If VBA.Left(txtFilter, 1) = "*" Then 'public members only
-                If Not (mber.scope = vbext_Private) Then
-                    Set nn = CodeView.Nodes.Add(Nodes(e.mType), tvwChild, , NodeName, e.mType + i)
-                    Set nn.Tag = e
-                End If
-            ElseIf VBA.Left(txtFilter, 1) = "-" And Len(txtFilter) > 1 Then   'subtractive filter like -mnu,cmd,lv
-                Dim tmp() As String, addit As Boolean, x
-                addit = True
-                If InStr(txtFilter, ",") Then tmp = Split(Mid(txtFilter, 2), ",") Else tmp = Split(Mid(txtFilter, 2), " ")
-                For Each x In tmp
-                    If Len(x) > 0 Then
-                        If InStr(1, mber.name, x, vbTextCompare) > 0 Then
-                            addit = False
-                            Exit For
-                        End If
+        
+        If e.loc > 1 Then  'I dont want to see API declares to cluttered
+        
+            If Len(txtFilter) > 0 Then
+                If VBA.Left(txtFilter, 1) = "*" Then 'public members only
+                    If Not (mber.scope = vbext_Private) Then
+                        Set nn = CodeView.Nodes.Add(Nodes(e.mType), tvwChild, , NodeName, e.mType + i)
+                        Set nn.Tag = e
                     End If
-                Next
-                If addit Then
+                ElseIf VBA.Left(txtFilter, 1) = "-" And Len(txtFilter) > 1 Then   'subtractive filter like -mnu,cmd,lv
+                    Dim tmp() As String, addit As Boolean, x
+                    addit = True
+                    If InStr(txtFilter, ",") Then tmp = Split(Mid(txtFilter, 2), ",") Else tmp = Split(Mid(txtFilter, 2), " ")
+                    For Each x In tmp
+                        If Len(x) > 0 Then
+                            If InStr(1, mber.name, x, vbTextCompare) > 0 Then
+                                addit = False
+                                Exit For
+                            End If
+                        End If
+                    Next
+                    If addit Then
+                        Set nn = CodeView.Nodes.Add(Nodes(e.mType), tvwChild, , NodeName, e.mType + i)
+                        Set nn.Tag = e
+                    Else
+                        'Stop
+                    End If
+                ElseIf InStr(1, mber.name, txtFilter, vbTextCompare) > 0 Then
                     Set nn = CodeView.Nodes.Add(Nodes(e.mType), tvwChild, , NodeName, e.mType + i)
                     Set nn.Tag = e
-                Else
-                    'Stop
                 End If
-            ElseIf InStr(1, mber.name, txtFilter, vbTextCompare) > 0 Then
+            Else
+                Err.Clear
                 Set nn = CodeView.Nodes.Add(Nodes(e.mType), tvwChild, , NodeName, e.mType + i)
                 Set nn.Tag = e
+                'If mType = vbext_mt_Event Then Debug.Print "proto: " & nn.Tag & " key:" & key & " err:" & Err.Description 'some garbage is appearing here...
             End If
-        Else
-            Err.Clear
-            Set nn = CodeView.Nodes.Add(Nodes(e.mType), tvwChild, , NodeName, e.mType + i)
-            Set nn.Tag = e
-            'If mType = vbext_mt_Event Then Debug.Print "proto: " & nn.Tag & " key:" & key & " err:" & Err.Description 'some garbage is appearing here...
+            
         End If
-                
+        
     Next
     
     NodeName = ActiveCodeModule.parent.name
@@ -551,26 +601,40 @@ Private Function GetTotalLOC()
 
 End Function
 
-Private Sub lblFilter_Click()
-    txtFilter.Text = ""
-End Sub
  
+ 
+Private Sub lblFilter_MouseUp(Button As Integer, Shift As Integer, x As Single, Y As Single)
+   ' If Button = 1 Then
+        txtFilter.Text = ""
+   ' Else
+   '     MsgBox Replace(Replace("Special Keywords:\n\t* shows public members only\n\t- allows subtractive filters\n\t?loc shows total lines of code", "\t", vbTab), "\n", vbCrLf)
+   ' End If
+End Sub
+
+Private Sub lblHelp_Click()
+    Const msg = "Special Keywords:\n\t* shows public members only\n\t- allows subtractive filters\n\t?loc shows total lines of code\n\tClick Filter: to clear"
+    MsgBox Replace(Replace(msg, "\t", vbTab), "\n", vbCrLf)
+End Sub
+
 Private Sub mnuCopyPublic_Click()
     'On Error Resume Next
     Dim n As Node
     Dim x() As String
+    Dim names() As String
     Dim Text As String
     Dim a As Long
     Dim e As CEntry
     
     If Nodes(vbext_mt_Variable).Children > 0 Then
         push x, "'Variables"
+        push names(), vbCrLf & "'Variables"
         For Each n In CodeView.Nodes
             If Not n.parent Is Nothing Then
                 If n.parent = Nodes(vbext_mt_Variable) Then
                         Set e = n.Tag
                         If e.scope = 0 Then
                             push x(), e.proto
+                            push names(), e.name
                         End If
                         Debug.Print e.proto
                 End If
@@ -581,6 +645,7 @@ Private Sub mnuCopyPublic_Click()
     
     If Nodes(vbext_mt_Event).Children > 0 Then
         push x, "'Events"
+        push names, vbCrLf & "'Events"
         For Each n In CodeView.Nodes
             If Not n.parent Is Nothing Then
                 If n.parent = Nodes(vbext_mt_Event) Then
@@ -589,6 +654,7 @@ Private Sub mnuCopyPublic_Click()
                         If Left(Text, 7) = "Public " Then Text = Replace(Text, "Public ", "", , 1)
                         If InStr(1, Text, "Private") < 1 Then
                             push x(), Text
+                            push names(), e.name
                         End If
                         Debug.Print Text
                 End If
@@ -599,6 +665,7 @@ Private Sub mnuCopyPublic_Click()
     
     If Nodes(vbext_mt_Property).Children > 0 Then
         push x, "'Properties"
+        push names, vbCrLf & "'Properties"
         For Each n In CodeView.Nodes
             If Not n.parent Is Nothing Then
                 If n.parent = Nodes(vbext_mt_Property) Then
@@ -607,6 +674,7 @@ Private Sub mnuCopyPublic_Click()
                         Text = Replace(Text, "Property Get", "Property")
                         If Left(Text, 7) = "Public " Then Text = Replace(Text, "Public ", "", , 1)
                         push x(), Text
+                        push names(), e.name
                 End If
             End If
         Next
@@ -615,20 +683,34 @@ Private Sub mnuCopyPublic_Click()
     
     If Nodes(vbext_mt_Method).Children > 0 Then
         push x, "'Methods"
+        push names, vbCrLf & "'Methods"
         For Each n In CodeView.Nodes
             If Not n.parent Is Nothing Then
                 If n.parent = Nodes(vbext_mt_Method) Then
                         Set e = n.Tag
                         Text = e.proto
                         If Left(Text, 7) = "Public " Then Text = Replace(Text, "Public ", "", , 1)
-                        If n.Image = 1 Then push x(), Text
+                        If n.Image = 1 Then
+                            push x(), Text
+                            push names(), e.name
+                        End If
                 End If
             End If
         Next
     End If
 
-    Clipboard.Clear
-    Clipboard.SetText Join(x, vbCrLf)
+    Dim pth As String, initDir As String, dat As String
+    
+    initDir = GetParentFolder(g_VBInstance.ActiveVBProject.filename)
+    dat = "'" & ActiveCodeModule.parent.name & vbCrLf & vbCrLf & Join(x, vbCrLf) & vbCrLf & Join(names, " ")
+    
+    pth = SaveDialog(ActiveCodeModule.parent.name & ".txt", initDir, "Save As (Cancel to Copy)")
+    If Len(pth) = 0 Then
+        Clipboard.Clear
+        Clipboard.SetText dat
+    Else
+        writeFile pth, dat
+    End If
         
 End Sub
 
@@ -681,6 +763,7 @@ End Sub
 
 Private Sub Timer_Timer()
 
+'use f5 to refresh view on demand
     
 '    'this used to autoreload if line count changed..this is to often
 '    'the following might work better refreshing the treeview when a complete new member was added..
@@ -759,3 +842,90 @@ Private Sub UserDocument_Terminate()
     On Error Resume Next
     SaveMySetting ProjectName, Trim(txtFilter.Text)
 End Sub
+
+Sub writeFile(path As String, it As Variant)
+    On Error Resume Next
+    Dim f As Long
+    f = FreeFile
+    Open path For Output As #f
+    Print #f, it
+    Close f
+End Sub
+
+Private Function FileExists(path As String) As Boolean
+  On Error GoTo hell
+    
+  If Len(path) = 0 Then Exit Function
+  If Asc(Left(path, 1)) = 0 Then Exit Function
+  If Right(path, 1) = "\" Then Exit Function
+  If InStr(path, Chr(0)) > 0 Then Exit Function
+  If Dir(path, vbHidden Or vbNormal Or vbReadOnly Or vbSystem) <> "" Then FileExists = True
+  
+  Exit Function
+hell: FileExists = False
+End Function
+
+Private Function GetParentFolder(path) As String
+    Dim tmp() As String
+    Dim my_path
+    Dim ub As String
+    
+    On Error GoTo hell
+    If Len(path) = 0 Then Exit Function
+    
+    my_path = path
+    While Len(my_path) > 0 And Right(my_path, 1) = "\"
+        my_path = Mid(my_path, 1, Len(my_path) - 1)
+    Wend
+    
+    tmp = Split(my_path, "\")
+    tmp(UBound(tmp)) = Empty
+    my_path = Replace(Join(tmp, "\"), "\\", "\")
+    If VBA.Right(my_path, 1) = "\" Then my_path = Mid(my_path, 1, Len(my_path) - 1)
+    
+    GetParentFolder = my_path
+    Exit Function
+    
+hell:
+    GetParentFolder = Empty
+    
+End Function
+
+Function SaveDialog(Optional ByVal defaultFileName As String, Optional initDir = "", Optional title = "Save File") As String
+    
+    'If Len(initDir) <> 0 Then lastDir = initDir
+    Dim o As OPENFILENAME
+    
+    o.lStructSize = Len(o)
+    o.hWndOwner = GetForegroundWindow()
+    o.hInstance = 0
+    o.lpstrFilter = "All Files (*.*)" + Chr$(0) + "*.*" + Chr$(0)
+    o.lpstrFile = Space$(254)
+    o.nMaxFile = 255
+    o.lpstrFileTitle = Space$(254)
+    o.nMaxFileTitle = 255
+    o.lpstrInitialDir = initDir
+    o.lpstrTitle = CStr(title)
+    o.lpstrDefExt = "txt"
+    o.flags = 0
+    
+    If Len(defaultFileName) > 0 Then
+        o.lpstrFile = CStr(defaultFileName) & Space$(254)
+        o.nMaxFile = Len(o.lpstrFile) + 1
+    End If
+
+    Dim tmp As String
+    tmp = IIf(GetSaveFileName(o), Trim$(o.lpstrFile), "")
+    If tmp <> "" Then
+        If FileExists(tmp) Then
+            If MsgBox("File Already Exists" & vbCrLf & vbCrLf & "Are you sure you wish to overwrite existing file?", vbYesNo + vbExclamation, "Confirm Overwrite") = vbYes Then SaveDialog = tmp
+        Else
+            SaveDialog = tmp
+        End If
+    Else
+       SaveDialog = tmp
+    End If
+    
+    SaveDialog = Replace(SaveDialog, Chr(0), Empty)
+       
+End Function

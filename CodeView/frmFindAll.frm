@@ -156,10 +156,11 @@ Begin VB.Form frmFindAll
          Size            =   12
          Charset         =   0
          Weight          =   400
-         Underline       =   0   'False
+         Underline       =   -1  'True
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
+      ForeColor       =   &H00FF0000&
       Height          =   285
       Left            =   135
       TabIndex        =   0
@@ -186,7 +187,7 @@ Attribute VB_Exposed = False
 
 
 Private bCancel As Boolean
-Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long)
+Private Declare Sub SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long)
 Private Const HWND_TOPMOST = -1
 
 Private historyFile As String
@@ -531,8 +532,14 @@ Private Sub Form_Unload(Cancel As Integer)
     SaveSetting "codeview", "ipc", "txtIPC", 0
 End Sub
 
-Private Sub Label1_Click()
-    txtFind.Text = Empty
+ 
+
+Private Sub Label1_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    If Button = 2 Then
+        MsgBox "Supported commands /clear to clear history, click once to empty textbox", vbInformation
+    Else
+        txtFind.Text = Empty
+    End If
 End Sub
 
 Private Sub lv_ItemClick(ByVal Item As MSComctlLib.ListItem)
@@ -562,7 +569,7 @@ hell:
     
 End Sub
 
-Private Sub lv_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lv_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Button = 2 Then PopupMenu mnuPopup
 End Sub
 
@@ -586,13 +593,13 @@ Private Sub lvMod_ItemClick(ByVal Item As MSComctlLib.ListItem)
 End Sub
 
 Private Sub mnuCopyAll_Click()
-    Dim x() As String
+    Dim X() As String
     Dim li As ListItem
     For Each li In lv.ListItems
-        push x, Join(Array(li.Text, li.SubItems(1), li.SubItems(2)), vbTab)
+        push X, Join(Array(li.Text, li.SubItems(1), li.SubItems(2)), vbTab)
     Next
     Clipboard.Clear
-    Clipboard.SetText Join(x, vbCrLf)
+    Clipboard.SetText Join(X, vbCrLf)
 End Sub
 
 Private Sub mnuSearchList_Click()

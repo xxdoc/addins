@@ -1,10 +1,10 @@
 Type=Exe
 Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\Windows\SysWOW64\stdole2.tlb#OLE Automation
 Reference=*\G{60E64C4D-86E1-4F70-9D74-82C8C8F7745C}#75.0#0#..\..\..\libs\dzrt\dzrt.dll#.DZ Runtime from Sandsprite.com
+Object={0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0; msscript.ocx
 Object={831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0; MSCOMCTL.OCX
 Form=Form1.frm
 UserControl=ucFilterList.ctl
-Object={0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0; msscript.ocx
 Startup="Form1"
 ExeName32="searchList.exe"
 Command32=""

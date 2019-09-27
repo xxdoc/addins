@@ -8,6 +8,7 @@ function ItemClick_Process(x){
     p.buf1 =  x[2]  //save cur name for opcode lookup in desired
     p.buf2 =  x[3]
     x = x[0] + ', &H'+x[1]
+    //x = ', "' + x[2]
     p.lst("searching for: " + x)
     return x
 }
