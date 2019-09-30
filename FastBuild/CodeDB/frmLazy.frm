@@ -12,6 +12,14 @@ Begin VB.Form frmLazy
    ScaleHeight     =   5820
    ScaleWidth      =   10245
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CommandButton cmdByte 
+      Caption         =   "Byte()"
+      Height          =   330
+      Left            =   45
+      TabIndex        =   10
+      Top             =   5355
+      Width           =   1455
+   End
    Begin VB.CommandButton cmdClear 
       Caption         =   "Clear"
       Height          =   375
@@ -63,9 +71,9 @@ Begin VB.Form frmLazy
    Begin VB.CheckBox Check1 
       Caption         =   "w/ vbCrLf"
       Height          =   255
-      Left            =   1845
+      Left            =   2745
       TabIndex        =   3
-      Top             =   5400
+      Top             =   5355
       Width           =   1155
    End
    Begin VB.CommandButton Command2 
@@ -117,6 +125,49 @@ Const CF = "</FONT>"
 Dim RW() As String
 Dim Special() As String
     
+Private Sub cmdByte_Click()
+    
+    On Error Resume Next
+    
+    Dim s As String, i
+    Dim ret As String, b As Byte
+    Dim decoder As String
+    
+    Dim xKey
+    
+again:
+    xKey = InputBox("Enter optional xorkey ", , "&h66")
+    If Len(xKey) = 0 Then xKey = 0
+    
+    Err.Clear
+    xKey = CByte(CLng(xKey))
+    
+    If Err.Number <> 0 Then
+        MsgBox "Invalid xor byte value, remember &h prefix for hex"
+        GoTo again
+    End If
+    
+    s = Text2
+    ret = "dim b(" & Len(s) - 1 & ") as byte:"
+    For i = 1 To Len(s)
+        b = CByte(Asc(Mid(s, i, 1)))
+        If xKey = 0 Then
+            ret = ret & "b(" & i - 1 & ") = &h" & Hex(b)
+        Else
+            ret = ret & "b(" & i - 1 & ") = &h" & Hex(b Xor xKey)
+        End If
+        ret = ret & ": "
+    Next
+        
+    If xKey > 0 Then
+        decoder = " XOR key &h" & Hex(xKey) & vbCrLf & _
+                  "'For i = 0 To UBound(b): b(i) = b(i) Xor &H" & Hex(xKey) & ": Next"
+    End If
+    
+    Text2 = "'" & s & decoder & vbCrLf & Mid(ret, 1, Len(ret) - 2)
+    
+End Sub
+
 Private Sub cmdClear_Click()
     Text2 = Empty
 End Sub
@@ -243,7 +294,7 @@ Private Sub Command2_Click()
     tmp() = Split(ret, vbCrLf)
     
     For i = 0 To UBound(tmp)
-        tmp(i) = """" & tmp(i) & """ " & IIf(Check1.Value = 1, "& vbcrlf ", "") & "& _"
+        tmp(i) = """" & tmp(i) & """ " & IIf(Check1.value = 1, "& vbcrlf ", "") & "& _"
     Next
     
     ret = Join(tmp(), vbCrLf)
@@ -270,12 +321,12 @@ Dim tmp, i, e
 End Sub
 
 Private Sub Command4_Click()
-    Dim X, i, ret
+    Dim x, i, ret
     
-    X = Split(Text2, vbCrLf)
-    For i = 0 To UBound(X)
-        If Len(Trim(X(i))) > 0 Then
-            ret = ret & X(i) & ": "
+    x = Split(Text2, vbCrLf)
+    For i = 0 To UBound(x)
+        If Len(Trim(x(i))) > 0 Then
+            ret = ret & x(i) & ": "
         Else
             ret = ret & vbCrLf
         End If
@@ -283,7 +334,7 @@ Private Sub Command4_Click()
     
     ret = Replace(ret, ": " & vbCrLf, vbCrLf)
     
-    If chkStripSpace.Value = 1 Then
+    If chkStripSpace.value = 1 Then
         ret = Replace(ret, "  ", "")
     End If
     
