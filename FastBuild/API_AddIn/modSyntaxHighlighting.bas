@@ -474,6 +474,16 @@ End Function
 
 
 
+Sub push(ary, value) 'this modifies parent ary object
+    On Error GoTo init
+    Dim x
+    x = UBound(ary) '<-throws Error If Not initalized
+    ReDim Preserve ary(UBound(ary) + 1)
+    ary(UBound(ary)) = value
+    Exit Sub
+init:     ReDim ary(0): ary(0) = value
+End Sub
+
 Function IsIde() As Boolean
 ' Brad Martinez  http://www.mvps.org/ccrp
     On Error GoTo out

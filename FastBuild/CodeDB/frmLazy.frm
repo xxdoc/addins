@@ -12,6 +12,14 @@ Begin VB.Form frmLazy
    ScaleHeight     =   5820
    ScaleWidth      =   10245
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CommandButton Command5 
+      Caption         =   "Enum to Text"
+      Height          =   375
+      Left            =   7500
+      TabIndex        =   11
+      Top             =   5400
+      Width           =   1395
+   End
    Begin VB.CommandButton cmdByte 
       Caption         =   "Byte()"
       Height          =   330
@@ -341,6 +349,48 @@ Private Sub Command4_Click()
     Text2 = ret
 End Sub
 
+
+Private Sub Command5_Click()
+    On Error Resume Next
+    'CALLBACK_MSG_RULE_MATCHING = 1 -> case 1: m = "CALLBACK_MSG_RULE_MATCHING"
+    Dim x() As String, y(), tmp() As String, z, i
+    Dim enumName As String, buf As String
+    
+    tmp = Split(Replace(Text2, vbTab, Empty), vbCrLf)
+    push y, "function __ENUMNAME_2Str(e as __ENUMNAME_) as string"
+    push y, "   Dim m as string "
+    push y, "   select case e"
+    For Each z In tmp
+        z = Trim(z)
+        If Left(z, 5) = "Enum " Then
+            enumName = Trim(Mid(z, 6))
+        End If
+        If InStr(z, "=") > 0 Then
+            x = Split(Trim(z), "=")
+            push y, vbTab & "   case " & Trim(x(1)) & ": m = """ & Trim(x(0)) & """"
+            i = i + 1
+        End If
+    Next
+    push y, "   End select"
+    push y, "   __ENUMNAME_2Str = m"
+    push y, "end function"
+    
+    If i = 0 Then
+        MsgBox "Expected input: CALLBACK_MSG_RULE_MATCHING = 1 " & vbCrLf & "-> case 1: m = CALLBACK_MSG_RULE_MATCHING"
+    Else
+        Err.Clear
+        buf = Join(y, vbCrLf)
+        If Len(enumName) > 0 Then buf = Replace(buf, "__ENUMNAME_", enumName)
+        Clipboard.Clear
+        Clipboard.SetText buf
+        If Err.Number > 0 Then
+            MsgBox Err.Description
+        Else
+            MsgBox i & " lines copied to clipboard"
+        End If
+    End If
+    
+End Sub
 
 Private Sub Form_Load()
     Text2 = Clipboard.GetText
