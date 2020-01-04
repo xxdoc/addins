@@ -12,6 +12,14 @@ Begin VB.Form frmLazy
    ScaleHeight     =   5820
    ScaleWidth      =   10245
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CommandButton cmdLockEnumCase 
+      Caption         =   "Lock Enum Case"
+      Height          =   315
+      Left            =   3840
+      TabIndex        =   12
+      Top             =   5400
+      Width           =   1455
+   End
    Begin VB.CommandButton Command5 
       Caption         =   "Enum to Text"
       Height          =   375
@@ -280,6 +288,89 @@ Function RemoveRedundantTags(it)
     'it = Replace(it, CF & vbCrLf & GRN, vbCrLf)
     RemoveRedundantTags = it
 End Function
+
+Private Sub cmdLockEnumCase_Click()
+    Dim tmp As String
+    If InStr(1, Text2, "Enum", vbTextCompare) < 1 Then
+        MsgBox "Paste an enum into textbox to process", vbInformation
+        Exit Sub
+    End If
+    tmp = LockEnumCase(Text2)
+    If Len(tmp) = 0 Then
+        MsgBox "Failed"
+    Else
+        Text2 = Text2 & vbCrLf & tmp
+    End If
+End Sub
+
+ 
+'Bonnie West Oct 9th, 2014, 06:19 PM #1
+'http://www.vbforums.com/showthread.php?778109-VB6-modLockEnumCase-bas-Enforce-Case-of-Enums
+Public Function LockEnumCase(enumText As String, Optional ByVal LineLen As Integer = 80) As String  'Adjust length of output lines as desired
+    Dim sBlock As String, sLine As String, sText As String, oMatch As Object 'Match
+
+   'See if there's anything to process; quit if no text was copied
+    'If Clipboard.GetFormat(vbCFText) Then sText = Clipboard.GetText Else Exit Function
+    sText = enumText
+    
+   'Prepend the conditional compiler directive that is set to False
+    sBlock = "#If False Then" & vbNewLine
+   'Dimension variables that reuses the Enum members' names
+    sLine = "Dim "
+
+    With CreateObject("VBScript.RegExp") 'New RegExp
+        .Global = True
+        .MultiLine = True
+
+       'Strip all comments
+       .Pattern = " +'.*$"
+        sText = .Replace(sText, vbNullString)
+
+       'Exclude Enum statements
+       .Pattern = "(\b(Private|Public)? Enum [A-Za-z]\w*\b)|(\bEnd Enum\b)"
+        sText = .Replace(sText, vbNullString)
+
+       'Split multiple expressions in a single line into their own lines
+        If InStrB(sText, ":") Then sText = Replace(sText, ":", vbNewLine)
+
+       'This should match most Enum member names, including those enclosed with []
+       .Pattern = "^ *([A-Za-z]\w*|\[.+\]) *(?:=|$)"
+
+        For Each oMatch In .Execute(sText)
+            sLine = sLine & (oMatch.SubMatches(0&) & ", ")
+
+           'Check if the string being built is exceeding
+           'the *suggested* limit of each output line
+            If Len(sLine) >= LineLen Then
+               'If so, commit this line to the output string
+                sBlock = sBlock & (sLine & "_")
+               'Begin anew at the next line
+                sLine = vbNewLine
+            End If
+        Next
+    End With
+
+   'Finish the conditional compiler directive block, removing empty lines as needed
+    sBlock = sBlock & (IIf(sLine <> vbNewLine, sLine, vbNullString) _
+                    & vbNewLine & "#End If" & vbNewLine)
+    
+    If InStr(sBlock, ",") = 0 Then
+        'we failed to do anything
+        Exit Function
+    Else
+        'Overwrite the last comma with a space
+         Mid$(sBlock, InStrRev(sBlock, ",")) = " "
+    End If
+    
+   'Try to erase the last underscore on the last line, if present
+    On Error Resume Next
+    Mid$(sBlock, InStrRev(sBlock, "_" & vbNewLine & "#")) = " "
+    On Error GoTo 0
+
+    LockEnumCase = sBlock
+End Function
+
+
 
 Private Sub Command1_Click()
     Dim s As String, i, l
